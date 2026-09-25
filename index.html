@@ -2602,7 +2602,7 @@ function updateCamera(dt){
     if (pov){
       // DRIVER: the driver's own eye on the right-hand seat. The downward tilt and lens depend on the screen so the
       // road fills the top part and the steering wheel + gauges sit just above the thumb controls
-      tilt = upright ? 0.4 : shortLand ? 0.2 : 0.15;               // upright phone: windscreen top right under the HUD
+      tilt = upright ? 0.46 : shortLand ? 0.2 : 0.15;              // upright phone: windscreen top right under the HUD
       hfov = upright ? 2 * Math.atan(Math.tan(39 * Math.PI / 180) * asp) * 180 / Math.PI : shortLand ? 104 : 100;
       // sitting tall: the eye is 0.12 m under the jhalar tips (2.985), so the whole road ahead shows up to the horizon
       ex = upright ? 0.38 : 0.5; ey = upright ? 2.86 : 2.84; ez = upright ? 1.75 : 1.45;
@@ -2613,7 +2613,7 @@ function updateCamera(dt){
       // The eye stays just under the jhalar tips so nothing hides the far road; it aims down so the roof is a
       // thin strip. An upright phone needs a wider lens to fit both men side by side; its stretched top and
       // bottom sit under the HUD and pedals
-      tilt = upright ? 0.66 : shortLand ? 0.24 : 0.36;
+      tilt = upright ? 0.8 : shortLand ? 0.24 : 0.36;
       hfov = upright ? clamp(2 * Math.atan(Math.tan(56 * Math.PI / 180) * asp) * 180 / Math.PI, 60, 72) : shortLand ? 108 : 104;
       ex = 0; ey = 2.95; ez = 2.16; lx = upright ? 0.06 : 0.02; maxV = upright ? 114 : 84;
     }
@@ -2937,7 +2937,9 @@ function tvWaiting(on){                                              // phones m
   const end = () => { if (!d) return; d = null; store.set(tvKey(), [TV.el.offsetLeft / innerWidth, TV.el.offsetTop / innerHeight]); };
   bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
   addEventListener('resize', () => { if (!TV.el.hidden) tvPlace(); });
-  $('ytClose').addEventListener('click', () => musicPause());
+  $('ytClose').addEventListener('click', () => {                    // YouTube does not allow its songs to play with the video hidden
+    musicPause(); toast('Video band = gaana band (YouTube rule) · bina video ke gaana: 🎵 → Add MP3', 'amber'); toastT = 4.5;
+  });
 }
 
 /* ---------- player ---------- */
