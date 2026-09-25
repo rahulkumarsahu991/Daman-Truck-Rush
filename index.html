@@ -2762,7 +2762,13 @@ function endRun(ok, reason){
    (IndexedDB) and are never uploaded anywhere.
    ================================================================= */
 // YouTube songs that come with the game: [video id, name]
-const YT_DEFAULT = [];
+const YT_DEFAULT = [
+  ['Swlik5Hfu-A', 'Pardesi Pardesi'],
+  ['efJvGjDHuzU', 'Aye Meri Mohabbat Sun'],
+  ['lFdSi01tpYM', 'Sochenge Tumhe Pyar Karen Ki Nahi'],
+  ['fBylcT-TWZw', 'Bas Ek Sanam Chahiye Aashiqui Ke Liye'],
+  ['zMSi4VtRZGQ', 'Raat Di Gedi'],
+];
 const MUSIC = { on: store.get('music', 1), idx: store.get('musicIdx', 0), playing: false, ctx: null, bus: null, el: null, elFor: null, url: null, mine: [],
   yt: store.get('ytSongs', []), ytHidden: store.get('ytHidden', []), bad: {} };
 const YTP = { api: null, player: null, ready: false, loaded: null, pending: null, state: -1, errors: 0 };
@@ -3093,7 +3099,7 @@ const sfx = (() => {
       if (!ctx) return; const t = ctx.currentTime, f = 26 + rpm * 64;
       o1.frequency.setTargetAtTime(f, t, 0.05); o2.frequency.setTargetAtTime(f * 0.5, t, 0.05);
       engF.frequency.setTargetAtTime(240 + thr * 900 + rpm * 420, t, 0.08);
-      engG.gain.setTargetAtTime(on ? 0.06 + thr * 0.07 : 0, t, 0.12);
+      engG.gain.setTargetAtTime(on && !MUSIC.playing ? 0.06 + thr * 0.07 : 0, t, 0.12);   // engine hum goes quiet while a song plays
     },
     horn(on){ if (ctx) hornG.gain.setTargetAtTime(on ? 0.11 : 0, ctx.currentTime, 0.02); },
     coin(){ tone(900, 1500, 0.12, 'triangle', 0.15); },
