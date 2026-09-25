@@ -160,9 +160,9 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .st-btns button:active{transform:translateY(1px);background:#f7931e;color:#1a1206}
 .st-btns svg{width:1.1em;height:1.1em}
 /* upright phone: stereo sits under the HUD, pump board moves below it */
+/* upright phone: the stereo sits low, just above the horn and pedals, so the whole windscreen stays clear */
 @media (orientation: portrait){
-  #stereo{bottom:auto;top:calc(var(--sat) + 8.1em)}
-  .cabin-view #pumpSign{top:calc(var(--sat) + 12.3em)}
+  #stereo{bottom:calc(var(--sab) + 16.1em)}
 }
 @media (prefers-reduced-motion: reduce){ #stereo.playing .st-eq i{animation:none;height:70%} }
 /* song rail on the right edge while driving: open list outside the cab, a small tab inside it */
@@ -197,8 +197,8 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 #mRail.playing .st-eq i:nth-child(3){animation-duration:.62s}
 @media (orientation: portrait){
   #mRail{top:calc(var(--sat) + 13.8em)}                /* below the pump board */
-  .mr-panel{width:11.2em;max-height:min(24em,calc(100vh - var(--sat) - var(--sab) - 30em))}
-  .cabin-view #mRail{top:calc(var(--sat) + 18.6em)}
+  .mr-panel{width:10.6em;max-height:min(24em,calc(100vh - var(--sat) - var(--sab) - 30em))}
+  .cabin-view #mRail{top:calc(var(--sat) + 8.2em)}
 }
 @media (orientation: landscape) and (max-height: 430px){
   #mRail{top:calc(var(--sat) + 6.4em)}
@@ -250,12 +250,13 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 /* Daman TV: YouTube's player must stay visible (at least 200 × 200 px) while a song plays; drag it by the side bar */
 #ytDock{position:fixed;left:4px;top:30%;z-index:45;display:flex;border-radius:10px;background:#000;
   border:2px solid var(--amber);box-shadow:0 6px 18px rgba(0,0,0,.5)}
-.yt-bar{width:26px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0 6px;background:var(--navy);border-radius:8px 0 0 8px;touch-action:none;cursor:grab}
+.yt-bar{width:32px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0 6px;background:linear-gradient(90deg,#232a6e,var(--navy));border-right:1px solid rgba(247,147,30,.5);border-radius:8px 0 0 8px;touch-action:none;cursor:grab;color:var(--amber-2)}
 .yt-bar:active{cursor:grabbing}
-.yt-bar button{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:rgba(255,75,62,.85);color:#fff}
+.yt-bar button{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;background:rgba(255,75,62,.85);color:#fff}
 .yt-bar button svg{width:12px;height:12px}
-.yt-grip{flex:1;width:10px;background:radial-gradient(circle,rgba(255,255,255,.6) 1.3px,transparent 1.7px) 0 0/5px 6px}
-.yt-tv{font:600 13px/1 'Teko',sans-serif;letter-spacing:.06em;color:var(--amber-2)}
+.yt-grip{flex:1;width:10px;min-height:10px;background:radial-gradient(circle,rgba(255,255,255,.55) 1.3px,transparent 1.7px) 0 0/5px 6px}
+.yt-move{width:20px;height:20px;flex:none}
+.yt-tv{font:600 13px/1 'Teko',sans-serif;letter-spacing:.12em;writing-mode:vertical-rl;transform:rotate(180deg)}
 .yt-screen{position:relative;width:200px;height:200px;background:#000;border-radius:0 8px 8px 0;overflow:hidden}
 .yt-hint{display:none;position:absolute;left:50%;top:100%;transform:translateX(-50%);width:max-content;max-width:90vw;margin:8px 0 0;pointer-events:none;
   background:var(--amber);color:#1a1206;padding:4px 10px;border-radius:12px;font:600 13px/1.25 'Hind',sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.45)}
@@ -643,7 +644,9 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
   <div class="yt-bar" title="Drag to move">
     <button id="ytClose" aria-label="Stop the song"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <span class="yt-grip" aria-hidden="true"></span>
-    <b class="yt-tv" aria-hidden="true">TV</b>
+    <svg class="yt-move" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>
+    <b class="yt-tv" aria-hidden="true">MOVE</b>
+    <span class="yt-grip" aria-hidden="true"></span>
   </div>
   <div class="yt-screen"><div id="ytFrame"></div></div>
   <p class="yt-hint">Tap ▶ on the video to play</p>
@@ -2036,20 +2039,20 @@ function makeCockpit(){
   add(tr(new THREE.PlaneGeometry(2.2, 1.04), 0, 2.56, 0.03), glassMat);
   add(tr(new THREE.PlaneGeometry(1.2, 0.68), 1.13, 2.56, 0.8, 0, -Math.PI / 2, 0), glassMat);
   add(tr(new THREE.PlaneGeometry(1.2, 0.68), -1.13, 2.56, 0.8, 0, Math.PI / 2, 0), glassMat);
-  const strip = canvasTex(1024, 64, (c, w, h) => {
+  const strip = canvasTex(1024, 36, (c, w, h) => {
     c.fillStyle = 'rgba(25,31,81,.88)'; c.fillRect(0, 0, w, h);
-    drawLogo(c, 40, h / 2, 52); drawLogo(c, w - 40, h / 2, 52);
-    c.fillStyle = '#f7931e'; c.textAlign = 'center'; c.textBaseline = 'middle'; fitText(c, 'DAMAN  MANDEEP  ROADLINE', w - 180, 46, 700, FONT_D); c.fillText('DAMAN  MANDEEP  ROADLINE', w / 2, h / 2 + 3);
+    drawLogo(c, 30, h / 2, 30); drawLogo(c, w - 30, h / 2, 30);
+    c.fillStyle = '#f7931e'; c.textAlign = 'center'; c.textBaseline = 'middle'; fitText(c, 'DAMAN  MANDEEP  ROADLINE', w - 140, 28, 700, FONT_D); c.fillText('DAMAN  MANDEEP  ROADLINE', w / 2, h / 2 + 2);
   });
-  add(tr(new THREE.PlaneGeometry(2.2, 0.11), 0, 3.0, 0.045), new THREE.MeshBasicMaterial({ map: strip, transparent: true, depthWrite: false }));
+  add(tr(new THREE.PlaneGeometry(2.2, 0.075), 0, 3.1, 0.214), new THREE.MeshBasicMaterial({ map: strip, transparent: true, depthWrite: false }));
   // jhalar: coloured fringe along the top of the windscreen
   const fringeCols = [0xd62839, 0xffc21a, 0x1b9a4b, 0xe5306e, 0x1f6fb2];
   fringeCols.forEach((col, ci) => {
     const tris = [];
-    for (let x = -1.05 + ci * 0.08; x <= 1.05; x += 0.08 * fringeCols.length) tris.push(new THREE.CircleGeometry(0.05, 3).rotateZ(-Math.PI / 2).translate(x, 2.985, 0.2));
+    for (let x = -1.05 + ci * 0.08; x <= 1.05; x += 0.08 * fringeCols.length) tris.push(new THREE.CircleGeometry(0.05, 3).rotateZ(-Math.PI / 2).translate(x, 3.035, 0.225));
     add(merge(tris), new THREE.MeshLambertMaterial({ color: col, side: THREE.DoubleSide }));
   });
-  box(lam(0xf2e6c8), 2.2, 0.008, 0.008, 0, 3.045, 0.2);
+  box(lam(0xf2e6c8), 2.2, 0.008, 0.008, 0, 3.058, 0.225);
   // marigold garland draped along the dashboard
   const beads = [[], []];
   for (let i = 0, x = -1.0; x <= 1.0; x += 0.045, i++) beads[i % 2].push(new THREE.SphereGeometry(0.024, 7, 5).translate(x, 2.1 - 0.05 * Math.abs(Math.sin(Math.PI * (x + 1) / 0.68)), 0.19));
@@ -2088,7 +2091,7 @@ const CONDUCTORS = {
 const CONDUCTOR_IDS = ['raju', 'sardar', 'chacha', 'munna', 'none'];
 const CONDUCTOR_DEFAULT = { '14': 'raju', '16': 'sardar', '18': 'chacha', 'tank': 'munna' };
 const DRIVER_LOOK = { shirt: '#191F51', pants: '#3b3a36', skin: '#8a5636', hair: '#141210', mustache: '#141210', logo: true };
-const DRIVER_HIP = new THREE.Vector3(0.5, 1.78, 1.5), CONDUCTOR_HIP = new THREE.Vector3(-0.55, 1.78, 1.5);
+const DRIVER_HIP = new THREE.Vector3(0.5, 1.73, 1.5), CONDUCTOR_HIP = new THREE.Vector3(-0.55, 1.73, 1.5);
 const crewMatCache = {};
 const crewMat = hex => crewMatCache[hex] || (crewMatCache[hex] = new THREE.MeshLambertMaterial({ color: new THREE.Color(hex) }));
 const LIMB_GEO = new THREE.CylinderGeometry(1, 0.88, 1, 8).translate(0, 0.5, 0);   // unit limb, base at the origin
@@ -2599,18 +2602,20 @@ function updateCamera(dt){
     if (pov){
       // DRIVER: the driver's own eye on the right-hand seat. The downward tilt and lens depend on the screen so the
       // road fills the top part and the steering wheel + gauges sit just above the thumb controls
-      tilt = upright ? 0.28 : shortLand ? 0.2 : 0.15;
+      tilt = upright ? 0.4 : shortLand ? 0.2 : 0.15;               // upright phone: windscreen top right under the HUD
       hfov = upright ? 2 * Math.atan(Math.tan(39 * Math.PI / 180) * asp) * 180 / Math.PI : shortLand ? 104 : 100;
-      ex = upright ? 0.38 : 0.5; ey = upright ? 2.8 : 2.78; ez = upright ? 1.75 : 1.45;   // eye kept below the jhalar so the road ahead is clear to the horizon
+      // sitting tall: the eye is 0.12 m under the jhalar tips (2.985), so the whole road ahead shows up to the horizon
+      ex = upright ? 0.38 : 0.5; ey = upright ? 2.86 : 2.84; ez = upright ? 1.75 : 1.45;
       lx = ex - (upright ? 0.04 : 0.05); maxV = upright ? 86 : 80;
     } else {
       // CABIN: sitting behind the seats, just under the roof — the driver (hands on the wheel) on the right,
-      // the conductor on the left, dashboard, windscreen and the road ahead above their heads
-      // (the eye is up at roof height, so it aims down and the roof stays a thin strip). An upright phone
-      // needs a wider lens to fit both men side by side; its stretched top and bottom sit under the HUD and pedals
-      tilt = upright ? 0.58 : shortLand ? 0.22 : 0.27;
+      // the conductor on the left, dashboard, windscreen and the road ahead above their heads.
+      // The eye stays just under the jhalar tips so nothing hides the far road; it aims down so the roof is a
+      // thin strip. An upright phone needs a wider lens to fit both men side by side; its stretched top and
+      // bottom sit under the HUD and pedals
+      tilt = upright ? 0.66 : shortLand ? 0.24 : 0.36;
       hfov = upright ? clamp(2 * Math.atan(Math.tan(56 * Math.PI / 180) * asp) * 180 / Math.PI, 60, 72) : shortLand ? 108 : 104;
-      ex = 0; ey = 3.07; ez = 2.16; lx = upright ? 0.06 : 0.02; maxV = upright ? 114 : 84;
+      ex = 0; ey = 2.95; ez = 2.16; lx = upright ? 0.06 : 0.02; maxV = upright ? 114 : 84;
     }
     _cp.set(ex, ey, -PL.L / 2 + ez).applyMatrix4(PL.grp.matrixWorld);
     _cl.set(lx, ey - Math.tan(tilt) * (30 + ez), -PL.L / 2 - 30).applyMatrix4(PL.grp.matrixWorld);
@@ -2904,7 +2909,7 @@ const TV = { el: $('ytDock'), tapT: 0 };
 function tvKey(){ return innerWidth >= innerHeight ? 'tvL' : 'tvP'; }
 function tvDefault(){
   const u = parseFloat(getComputedStyle(document.documentElement).fontSize) || 14;
-  if (innerWidth < innerHeight) return [0, Math.round((inCab() && G.mode !== 'menu' ? 18.6 : 13.8) * u)];   // upright: left side, below the HUD
+  if (innerWidth < innerHeight) return [0, Math.round(13.8 * u)];      // upright: left side, below the HUD and pump board
   return [0, Math.round(7.9 * u)];                                     // sideways: left edge under the speedometer, clear of the truck
 }
 function tvPlace(){
