@@ -165,6 +165,61 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
   .cabin-view #pumpSign{top:calc(var(--sat) + 12.3em)}
 }
 @media (prefers-reduced-motion: reduce){ #stereo.playing .st-eq i{animation:none;height:70%} }
+/* song rail on the right edge while driving: open list outside the cab, a small tab inside it */
+#mRail{position:absolute;right:calc(var(--sar) + .6em);top:calc(var(--sat) + 9.4em);pointer-events:auto;display:flex;flex-direction:column;align-items:flex-end}
+.mr-tab{display:none;align-items:center;gap:.3em;height:2.7em;padding:0 .7em;border-radius:1.4em;color:var(--amber-2);
+  background:rgba(12,16,48,.78);border:1px solid rgba(247,147,30,.55);box-shadow:0 .3em .9em rgba(0,0,0,.4)}
+.mr-tab svg{width:1.3em;height:1.3em}
+.mr-tab .st-eq{height:1.1em}
+#mRail:not(.open) .mr-tab{display:flex}
+#mRail:not(.open) .mr-panel{display:none}
+.mr-panel{width:13.6em;max-height:max(9em,calc(100vh - var(--sat) - var(--sab) - 23em));display:flex;flex-direction:column;gap:.4em;padding:.5em;
+  border-radius:.8em;background:rgba(12,16,48,.74);border:1px solid var(--line);box-shadow:0 .4em 1.2em rgba(0,0,0,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.mr-head{display:flex;align-items:center;gap:.45em;padding-left:.2em}
+.mr-head b{flex:1;font:600 1.3em/1 'Teko',sans-serif;letter-spacing:.08em;color:var(--amber-2);padding-top:.15em}
+.mr-head .st-eq{height:1.1em}
+.mr-head button{width:2em;height:2em;border-radius:.45em;display:grid;place-items:center;background:rgba(255,255,255,.08)}
+.mr-head button svg{width:1.1em;height:1.1em}
+.mr-ctl{display:flex;gap:.3em}
+.mr-ctl button{flex:1;height:2.3em;border-radius:.5em;display:grid;place-items:center;color:#eceae3;background:linear-gradient(#41444d,#1c1e23);border:1px solid #5b6069}
+.mr-ctl button.big{background:var(--amber);border-color:var(--amber-2);color:#1a1206}
+.mr-ctl .mr-hide2{display:none;flex:.8;background:rgba(255,255,255,.08);border-color:var(--line)}
+.mr-ctl button:active{transform:translateY(1px)}
+.mr-ctl svg{width:1.05em;height:1.05em}
+.mr-list{list-style:none;margin:0;padding:0 .1em 0 0;display:grid;gap:.25em;overflow:auto;min-height:0;flex:1;touch-action:pan-y;overscroll-behavior:contain}
+.mr-list button{width:100%;display:flex;align-items:center;gap:.45em;padding:.4em .5em;border-radius:.45em;text-align:left;background:rgba(255,255,255,.06);font-size:.88em}
+.mr-list i{flex:none;width:1.5em;height:1.5em;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.85em;background:rgba(255,255,255,.1);color:var(--amber-2)}
+.mr-list span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.mr-list li.on button{background:rgba(247,147,30,.2);box-shadow:inset 0 0 0 1px var(--amber)}
+.mr-list li.on i{background:var(--amber);color:#1a1206}
+#mRail.playing .st-eq i{animation:eq .7s ease-in-out infinite alternate}
+#mRail.playing .st-eq i:nth-child(2){animation-duration:.45s}
+#mRail.playing .st-eq i:nth-child(3){animation-duration:.62s}
+@media (orientation: portrait){
+  #mRail{top:calc(var(--sat) + 13.8em)}                /* below the pump board */
+  .mr-panel{width:11.2em;max-height:min(24em,calc(100vh - var(--sat) - var(--sab) - 30em))}
+  .cabin-view #mRail{top:calc(var(--sat) + 18.6em)}
+}
+@media (orientation: landscape) and (max-height: 430px){
+  #mRail{top:calc(var(--sat) + 6.4em)}
+  .mr-head{display:none}
+  .mr-ctl .mr-hide2{display:grid}
+  .mr-panel{width:12.4em;max-height:calc(100vh - var(--sat) - var(--sab) - 19.4em);gap:.3em;padding:.4em}
+  .mr-head b{font-size:1.1em}
+  .mr-head button{width:1.7em;height:1.7em}
+  .mr-ctl button{height:2em}
+  .mr-list button{padding:.3em .45em}
+}
+@media (prefers-reduced-motion: reduce){ #mRail.playing .st-eq i{animation:none;height:70%} }
+/* conductor picker in the garage */
+.crew-pick{display:flex;gap:.35em;flex-wrap:wrap;align-items:center}
+.crew-pick > span{color:var(--muted);font-size:.9em;margin-right:.2em}
+.cw{display:flex;align-items:center;gap:.35em;padding:.2em .6em .2em .2em;border-radius:2em;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:.88em;font-weight:600}
+.cw.on{border-color:var(--amber);background:rgba(247,147,30,.18);color:var(--amber-2)}
+.av{position:relative;flex:none;width:2em;height:2em;border-radius:50%;overflow:hidden;background:linear-gradient(transparent 64%,var(--sh) 64%),#2a3470}
+.av b{position:absolute;left:50%;top:.34em;width:.92em;height:1.05em;margin-left:-.46em;border-radius:48% 48% 44% 44%;background:var(--sk);border-top:.3em solid var(--tp)}
+.av.beard b{box-shadow:inset 0 -.28em 0 var(--bd)}
+.av.none{display:grid;place-items:center;background:#2a3470;color:var(--muted);font-style:normal}
 /* song list */
 .music-card{gap:.7em}
 .m-head{display:flex;align-items:center;gap:.7em}
@@ -280,6 +335,15 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .coach-steer::after{left:2.2em}
 .coach-pedals{right:calc(var(--sar) + 1.1em);bottom:calc(var(--sab) + 17.4em);text-align:right}
 .coach-pedals::after{right:2em}
+/* sideways screens: horn sits left of the brake, so the song list on the right can reach down to the pedals */
+@media (orientation: landscape){
+  .cbtn.small{left:auto;right:calc(100% + .6em);bottom:.2em}
+  .coach-pedals{bottom:calc(var(--sab) + 11.6em)}
+  .mr-panel{max-height:max(9em,calc(100vh - var(--sat) - var(--sab) - 21.6em))}
+}
+@media (orientation: landscape) and (max-height: 430px){
+  .mr-panel{max-height:calc(100vh - var(--sat) - var(--sab) - 18.2em)}
+}
 @keyframes coachBob{to{transform:translateY(-.35em)}}
 @media (prefers-reduced-motion: reduce){ #coach p{animation:none} }
 #wheelCtl{pointer-events:auto;width:11.5em;height:11.5em;border-radius:50%;touch-action:none}
@@ -402,6 +466,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     <p id="gSub" class="g-sub"></p>
     <div id="gStats" class="stats"></div>
     <div id="gColors" class="swatches"></div>
+    <div id="gCrew" class="crew-pick" role="group" aria-label="Conductor for this truck"></div>
   </div>
   <footer class="scr-foot"><button class="btn big" data-go="routes">Next: Route</button></footer>
 </section>
@@ -474,6 +539,20 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
       <button id="stList" aria-label="All songs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
     </div>
   </div>
+  <aside id="mRail" class="open" aria-label="Daman FM songs">
+    <button id="mrTab" class="mr-tab" aria-label="Show song list"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 17.5a3 3 0 11-2-2.83V5l12-2v11.5a3 3 0 11-2-2.83V7.2l-8 1.33z"/></svg><span class="st-eq" aria-hidden="true"><i></i><i></i><i></i></span></button>
+    <div class="mr-panel">
+      <div class="mr-head"><span class="st-eq" aria-hidden="true"><i></i><i></i><i></i></span><b>DAMAN FM</b><button id="mrHide" aria-label="Hide song list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button></div>
+      <div class="mr-ctl">
+        <button id="mrPrev" aria-label="Previous song"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button id="mrPlay" class="big" aria-label="Play or pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
+        <button id="mrNext" aria-label="Next song"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+        <button id="mrMore" aria-label="Add your own songs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button id="mrHide2" class="mr-hide2" aria-label="Hide song list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <ul id="mrList" class="mr-list"></ul>
+    </div>
+  </aside>
   <div id="pumpSign" hidden role="status">
     <img class="ps-logo" data-logo alt="">
     <svg class="ps-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h9v18H4zM6 5v5h5V5zM14 8h2l3 3v7a2 2 0 01-4 0v-4h-1v-2h3v6h0V11.8L15.6 10H14z"/></svg>
@@ -524,7 +603,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     <h2>SETTINGS</h2>
     <div id="settingsBody">
       <div class="opt"><span>Steering</span><div class="seg" data-set="ctl"><button data-v="buttons">Left / Right buttons</button><button data-v="wheel">Steering wheel</button><button data-v="tilt">Tilt phone</button></div></div>
-      <div class="opt"><span>Camera</span><div class="seg" data-set="cam"><button data-v="0">Cabin</button><button data-v="1">Body</button><button data-v="2">Drone</button></div></div>
+      <div class="opt"><span>Camera</span><div class="seg" data-set="cam"><button data-v="0">Cabin</button><button data-v="3">Driver</button><button data-v="1">Body</button><button data-v="2">Drone</button></div></div>
       <div class="opt"><span>Accelerator</span><div class="seg" data-set="auto"><button data-v="0">Hold GAS</button><button data-v="1">Auto accelerate</button></div></div>
       <div class="opt"><span>Sound</span><div class="seg" data-set="snd"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
       <div class="opt"><span>Music (Daman FM)</span><div class="seg" data-set="music"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
@@ -1900,8 +1979,13 @@ function makeCockpit(){
   // windscreen frame: A-pillars, header, roof lining, sun visors, door sills
   box(plast2, 0.1, 1.1, 0.12, 1.12, 2.58, 0.1, 0, 0, 0.08); box(plast2, 0.1, 1.1, 0.12, -1.12, 2.58, 0.1, 0, 0, -0.08);   // taller A-pillars: bigger windscreen
   box(plast2, 2.32, 0.08, 0.18, 0, 3.1, 0.12);                          // header raised to just under the cab roof
-  box(beige, 2.32, 0.04, 1.6, 0, 3.13, 0.9);
+  box(beige, 2.32, 0.04, 2.12, 0, 3.13, 1.16);                          // headliner runs to the back wall
   box(beige, 0.75, 0.02, 0.26, 0.55, 3.05, 0.27, -0.25); box(beige, 0.75, 0.02, 0.26, -0.55, 3.05, 0.27, -0.25);
+  // floor mat, engine hump between the seats, and the rear corners of the cab behind the doors
+  box(lam(0x1c1d21), 2.26, 0.04, 1.95, 0, 1.47, 1.2);
+  box(plast, 0.44, 0.3, 1.2, -0.02, 1.64, 1.6);
+  box(lam(0x4a4d55), 2.26, 1.7, 0.05, 0, 2.3, 2.2);
+  for (const sx of [1, -1]) box(lam(0x3f424a), 0.05, 1.7, 0.66, sx * 1.14, 2.3, 1.88);
   for (const sx of [1, -1]){                                                             // doors
     box(lam(0x3f424a), 0.05, 0.72, 1.3, sx * 1.14, 1.84, 0.9);
     box(plast2, 0.12, 0.06, 1.3, sx * 1.12, 2.21, 0.9);
@@ -1950,6 +2034,121 @@ function makeCockpit(){
 }
 
 /* =================================================================
+   CREW — the driver (right seat, hands on the wheel) and a conductor
+   (left seat) chosen per truck. Low-poly, built in cab-local coords
+   (z = 0 at the cab front, +z towards the back of the cab).
+   ================================================================= */
+const CONDUCTORS = {
+  raju:   { name: 'Raju',      shirt: '#c62828', pants: '#2f3a4f', skin: '#8d5a3b', hair: '#161310', cap: '#f7931e' },
+  sardar: { name: 'Sardar ji', shirt: '#1f5fa8', pants: '#2b2b2b', skin: '#a8714d', hair: '#161310', turban: '#f5a623', beard: '#161310' },
+  chacha: { name: 'Chacha',    shirt: '#ecebe6', pants: '#e2e0da', skin: '#7a4b31', hair: '#d9d6cf', mustache: '#e8e6e0', gamcha: '#b3202a' },
+  munna:  { name: 'Munna',     shirt: '#f2b705', pants: '#3a3f4a', skin: '#9a6444', hair: '#161310' },
+  none:   { name: 'No conductor' },
+};
+const CONDUCTOR_IDS = ['raju', 'sardar', 'chacha', 'munna', 'none'];
+const CONDUCTOR_DEFAULT = { '14': 'raju', '16': 'sardar', '18': 'chacha', 'tank': 'munna' };
+const DRIVER_LOOK = { shirt: '#191F51', pants: '#3b3a36', skin: '#8a5636', hair: '#141210', mustache: '#141210', logo: true };
+const DRIVER_HIP = new THREE.Vector3(0.5, 1.78, 1.5), CONDUCTOR_HIP = new THREE.Vector3(-0.55, 1.78, 1.5);
+const crewMatCache = {};
+const crewMat = hex => crewMatCache[hex] || (crewMatCache[hex] = new THREE.MeshLambertMaterial({ color: new THREE.Color(hex) }));
+const LIMB_GEO = new THREE.CylinderGeometry(1, 0.88, 1, 8).translate(0, 0.5, 0);   // unit limb, base at the origin
+const HAND_GEO = new THREE.SphereGeometry(0.045, 8, 6).scale(0.9, 0.75, 1.25);
+const _Y = new THREE.Vector3(0, 1, 0), _ld = new THREE.Vector3();
+function limb(mesh, a, b, r){                                     // stretch a limb mesh from point a to point b
+  _ld.subVectors(b, a); const len = _ld.length() || 0.001;
+  mesh.position.copy(a); mesh.quaternion.setFromUnitVectors(_Y, _ld.multiplyScalar(1 / len)); mesh.scale.set(r, len, r);
+}
+// a seated person: { grp, body, head, arms: [{ ua, fa, hand }, …] } — the caller poses the arms
+function buildPerson(L){
+  const P = { grp: new THREE.Group(), body: new THREE.Group(), head: new THREE.Group(), arms: [] };
+  const parts = new Map(), put = (hex, g) => { if (!parts.has(hex)) parts.set(hex, []); parts.get(hex).push(g); };
+  const bx = (hex, w, h, d, x, y, z, rx) => put(hex, tr(new THREE.BoxGeometry(w, h, d), x, y, z, rx));
+  // seat: cushion + a low backrest so the shoulders show from behind
+  bx('#24262b', 0.54, 0.12, 0.5, 0, -0.07, 0.02); bx('#2c2f35', 0.52, 0.55, 0.1, 0, 0.26, 0.3, -0.12);
+  // pelvis, thighs, shins, feet
+  bx(L.pants, 0.36, 0.16, 0.3, 0, 0.08, 0.02);
+  for (const s of [-1, 1]){
+    put(L.pants, tr(new THREE.CylinderGeometry(0.075, 0.07, 0.46, 8), s * 0.1, 0.09, -0.22, Math.PI / 2));
+    put(L.pants, tr(new THREE.CylinderGeometry(0.06, 0.055, 0.36, 8), s * 0.1, -0.1, -0.45));
+    bx('#1b1b1d', 0.1, 0.07, 0.22, s * 0.1, -0.26, -0.5);
+  }
+  // torso (rounded), shoulders, neck, optional gamcha over the shoulder
+  put(L.shirt, tr(new THREE.CylinderGeometry(0.2, 0.16, 0.54, 10), 0, 0.41, 0.02, -0.06, 0, 0, 1, 1, 0.62));
+  put(L.shirt, tr(new THREE.SphereGeometry(0.075, 8, 6), -0.2, 0.64, 0.01)); put(L.shirt, tr(new THREE.SphereGeometry(0.075, 8, 6), 0.2, 0.64, 0.01));
+  put(L.skin, tr(new THREE.CylinderGeometry(0.048, 0.052, 0.1, 8), 0, 0.73, 0.01));
+  if (L.gamcha) bx(L.gamcha, 0.09, 0.02, 0.4, -0.16, 0.69, 0.0, 0.1);
+  for (const [hex, arr] of parts){ const m = new THREE.Mesh(merge(arr), crewMat(hex)); m.castShadow = true; P.body.add(m); }
+  if (L.logo){ const back = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.18), MAT.logo); back.position.set(0, 0.47, 0.135); P.body.add(back); }   // Daman logo on the uniform's back
+  // head: face, ears, hair or turban, cap, beard, moustache
+  const hp = new Map(), hput = (hex, g) => { if (!hp.has(hex)) hp.set(hex, []); hp.get(hex).push(g); };
+  hput(L.skin, tr(new THREE.SphereGeometry(0.1, 14, 10), 0, 0, 0, 0, 0, 0, 0.86, 1.12, 1));
+  hput(L.skin, tr(new THREE.SphereGeometry(0.024, 6, 4), -0.087, -0.005, 0.01)); hput(L.skin, tr(new THREE.SphereGeometry(0.024, 6, 4), 0.087, -0.005, 0.01));
+  if (L.turban){ hput(L.turban, tr(new THREE.SphereGeometry(0.122, 14, 8), 0, 0.07, 0.01, 0, 0, 0, 0.9, 0.78, 1.04)); hput(L.turban, tr(new THREE.ConeGeometry(0.05, 0.08, 8), 0, 0.11, -0.1, -0.9)); }
+  else hput(L.hair, tr(new THREE.SphereGeometry(0.108, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.6), 0, 0.012, 0.006, 0.35, 0, 0, 0.88, 1.08, 1));
+  if (L.cap){ hput(L.cap, tr(new THREE.CylinderGeometry(0.108, 0.111, 0.1, 14), 0, 0.092, 0.005, 0, 0, 0, 0.9, 1, 1)); hput(L.cap, tr(new THREE.BoxGeometry(0.15, 0.012, 0.11), 0, 0.045, -0.13)); }
+  if (L.beard) hput(L.beard, tr(new THREE.SphereGeometry(0.085, 10, 8), 0, -0.07, -0.035, 0, 0, 0, 1, 0.9, 0.8));
+  if (L.mustache) hput(L.mustache, tr(new THREE.BoxGeometry(0.085, 0.016, 0.02), 0, -0.035, -0.1));
+  for (const [hex, arr] of hp){ const m = new THREE.Mesh(merge(arr), crewMat(hex)); m.castShadow = true; P.head.add(m); }
+  P.head.position.set(0, 0.86, 0);
+  // arms: sleeve (upper arm), bare forearm, hand
+  for (let i = 0; i < 2; i++){
+    const a = { ua: new THREE.Mesh(LIMB_GEO, crewMat(L.shirt)), fa: new THREE.Mesh(LIMB_GEO, crewMat(L.skin)), hand: new THREE.Mesh(HAND_GEO, crewMat(L.skin)) };
+    P.grp.add(a.ua, a.fa, a.hand); P.arms.push(a);
+  }
+  P.grp.add(P.body, P.head);
+  return P;
+}
+const CREW = { grp: new THREE.Group(), driver: null, conductor: null, t: 0, id: null };
+cockpit.add(CREW.grp);                                             // the crew rides in the cabin interior
+function buildCrew(conductorId){
+  if (CREW.driver && CREW.id === conductorId) return;
+  CREW.id = conductorId;
+  for (const c of [...CREW.grp.children]){
+    CREW.grp.remove(c);
+    c.traverse(o => { if (o.isMesh && o.geometry !== LIMB_GEO && o.geometry !== HAND_GEO && o.material !== MAT.logo) o.geometry.dispose(); });
+  }
+  CREW.driver = buildPerson(DRIVER_LOOK); CREW.driver.grp.position.copy(DRIVER_HIP); CREW.grp.add(CREW.driver.grp);
+  CREW.conductor = null;
+  const L = CONDUCTORS[conductorId];
+  if (L && L.shirt){ CREW.conductor = buildPerson(L); CREW.conductor.grp.position.copy(CONDUCTOR_HIP); CREW.conductor.grp.rotation.y = 0.08; CREW.grp.add(CREW.conductor.grp); }
+  poseCrew(0, 0, 1 / 60);
+}
+// the driver's hands grip the steering wheel rim (about 10 and 2 o'clock) and turn with it
+const _sh = new THREE.Vector3(), _el = new THREE.Vector3(), _hd = new THREE.Vector3();
+function wheelPoint(side, wheelAngle, out){
+  const ang = side * 0.95, x0 = Math.sin(ang) * 0.23, y0 = Math.cos(ang) * 0.23;
+  const c = Math.cos(wheelAngle), s = Math.sin(wheelAngle), x = x0 * c - y0 * s, y = x0 * s + y0 * c;
+  const r = -0.52;                                                // steering wheel tilt (matches makeCockpit)
+  return out.set(0.5 + x, 2.2 + y * Math.cos(r) - 0.03 * Math.sin(r), 0.95 + y * Math.sin(r) + 0.03 * Math.cos(r));
+}
+function poseCrew(wheelAngle, steer, dt){
+  CREW.t += dt;
+  const D = CREW.driver;
+  if (D){
+    D.body.rotation.z = -steer * 0.05; D.head.rotation.y = -steer * 0.18;
+    for (let i = 0; i < 2; i++){
+      const side = i === 0 ? -1 : 1, a = D.arms[i];
+      _sh.set(side * 0.21, 0.63, -0.04).add(DRIVER_HIP);
+      wheelPoint(side, wheelAngle, _hd);
+      _el.addVectors(_sh, _hd).multiplyScalar(0.5); _el.x += side * 0.07; _el.y -= 0.09;
+      _sh.sub(DRIVER_HIP); _el.sub(DRIVER_HIP); _hd.sub(DRIVER_HIP);   // into the driver's own frame
+      limb(a.ua, _sh, _el, 0.052); limb(a.fa, _el, _hd, 0.042); a.hand.position.copy(_hd);
+    }
+  }
+  const C = CREW.conductor;
+  if (C){                                                          // relaxed, glancing at the road and out of the window
+    C.head.rotation.y = Math.sin(CREW.t * 0.45) * 0.45 + Math.sin(CREW.t * 1.3) * 0.08;
+    C.head.rotation.x = Math.sin(CREW.t * 0.7) * 0.05;
+    for (let i = 0; i < 2; i++){
+      const side = i === 0 ? -1 : 1, a = C.arms[i];
+      _sh.set(side * 0.21, 0.63, -0.02); _el.set(side * 0.27, 0.38, -0.07);
+      _hd.set(side * (i === 0 ? 0.26 : 0.14), 0.2 + (i === 0 ? 0.12 : 0), -0.3 + (i === 0 ? 0.1 : 0));
+      limb(a.ua, _sh, _el, 0.052); limb(a.fa, _el, _hd, 0.042); a.hand.position.copy(_hd);
+    }
+  }
+}
+
+/* =================================================================
    LEVELS  — 30 levels in 6 tiers, Beginner → Pro Max
    ================================================================= */
 const TIERS = [['BEGINNER', 'Learn the road'], ['EASY', 'Light traffic'], ['MEDIUM', 'Busier lanes'],
@@ -1969,6 +2168,7 @@ const G = {
   mode: 'loading', truckId: store.get('truck', '14'), paints: store.get('paints', {}), route: store.get('route', 0), tod: store.get('tod', 'day'),
   ctl: store.get('ctl', 'buttons'), cam: store.get('cam', 1), autoGas: store.get('auto', 0), snd: store.get('snd', 1), gfx: store.get('gfx', 'auto'),
   unlocked: store.get('unlocked', 1), stars: store.get('stars', {}), bestEndless: store.get('bestEndless', 0),
+  conductors: store.get('conductors', {}),
   level: 1, endless: false, cfg: levelCfg(1),
   s: 40, s0: 40, l: 0, v: 0, steer: 0, vl: 0, yaw: 0, roll: 0, pitch: 0, bounce: 0, acc: 0, throttle: 0, braking: false,
   fuel: 1, hearts: 3, inv: 0, boostT: 0, coins: 0, near: 0, smash: 0, score: 0, time: 0, hours: 12.5, night: 0, shake: 0,
@@ -1982,6 +2182,7 @@ const IN = { left: false, right: false, gas: false, brake: false, horn: false, w
 /* ---------------- player truck ---------------- */
 let PL = null;
 function paintFor(id){ return G.paints[id] || TRUCKS[id].cab; }
+function conductorFor(id){ const c = G.conductors[id]; return CONDUCTORS[c] ? c : CONDUCTOR_DEFAULT[id] || 'raju'; }
 function buildPlayer(){
   if (cockpit.parent) cockpit.parent.remove(cockpit);         // the cabin interior is reused, never disposed
   if (PL){
@@ -1998,6 +2199,7 @@ function buildPlayer(){
     if (o.userData.matKey === 'glass') PL.glass = o;
   });
   cockpit.position.set(0, 0, -PL.L / 2); PL.grp.add(cockpit);   // cab front is at z = -L/2 on every truck
+  buildCrew(conductorFor(G.truckId));
   scene.add(PL.grp);
   placeOnRoad(PL.grp, G.s, G.l, 0);
 }
@@ -2239,7 +2441,7 @@ function updatePlayer(dt){
   G.bounce = Math.sin(G.time * 13) * 0.012 * clamp(G.v / 10, 0, 1) + (shoulder ? (Math.random() - 0.5) * 0.06 : 0);
   placeOnRoad(PL.grp, G.s, G.l, G.bounce, G.yaw, G.roll, G.pitch);
   for (const ax of PL.axles){ ax.rotation.x -= G.v * dt / ax.userData.r; if (ax.userData.steer) ax.rotation.y = -G.steer * 0.4; }
-  PL.grp.visible = G.inv > 0 && G.cam !== 0 ? Math.floor(G.inv * 10) % 2 === 0 : true;   // no blinking from inside the cab
+  PL.grp.visible = G.inv > 0 && !inCab() ? Math.floor(G.inv * 10) % 2 === 0 : true;   // no blinking from inside the cab
   PL.brakeMat.emissiveIntensity = brake ? 4 : 0.5 + G.night * 1.6;
 }
 function checkCollisions(){
@@ -2332,7 +2534,10 @@ function clockText(h){ const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 
 /* =================================================================
    CAMERA — cabin / body (chase) / drone, auto-fitted to screen + truck
    ================================================================= */
-const CAM_NAMES = ['CABIN', 'BODY', 'DRONE'];
+// cameras: 0 = CABIN (inside the cab, driver + conductor), 1 = BODY (chase), 2 = DRONE, 3 = DRIVER (driver's own eyes)
+const CAM_NAMES = ['CABIN', 'BODY', 'DRONE', 'DRIVER'];
+const CAM_NEXT = { 0: 3, 3: 1, 1: 2, 2: 0 };
+function inCab(){ return G.cam === 0 || G.cam === 3; }
 const CAM = { pos: new THREE.Vector3(), look: new THREE.Vector3(), init: false, orbit: 0.6 };
 const _cp = new THREE.Vector3(), _cl = new THREE.Vector3(), _base = new THREE.Vector3();
 function setLens(hfov, near, maxV){
@@ -2344,24 +2549,37 @@ function updateCamera(dt){
   // portrait screens: camera pulls back a little and looks down more, so the truck stays big and the sky small
   const asp = camera.aspect, tall = asp < 1, pf = tall ? Math.pow(clamp(1 / asp, 1, 2.3), 0.12) : 1;
   roadPoint(G.s, G.l, 0, _base); tangent(G.s, _tn);
-  const cabin = G.cam === 0;
+  const cabin = inCab(), pov = G.cam === 3;
   cockpit.visible = cabin; if (PL.glass) PL.glass.visible = !cabin;
   let k = 6;
   if (cabin){
     PL.grp.updateMatrixWorld();
-    // driver's eye on the right-hand seat. The downward tilt and lens depend on the screen so the road
-    // fills the top part and the steering wheel + gauges sit just above the thumb controls:
-    //   phone upright → 78° tall view, tilted 16°; short landscape phone → wide view, tilted 11°; laptop → 9°
     const asp = camera.aspect, upright = asp < 1, shortLand = !upright && innerHeight < 520;
-    const tilt = upright ? 0.28 : shortLand ? 0.2 : 0.15;
-    const hfov = upright ? 2 * Math.atan(Math.tan(39 * Math.PI / 180) * asp) * 180 / Math.PI : shortLand ? 104 : 100;
-    // upright phones sit a bit further back/up and slightly left: the wheel stays whole and the gear lever shows
-    const ex = upright ? 0.38 : 0.5, ey = upright ? 2.8 : 2.78, ez = upright ? 1.75 : 1.45;   // eye kept below the jhalar so the road ahead is clear to the horizon
+    let ex, ey, ez, lx, tilt, hfov, maxV;
+    if (pov){
+      // DRIVER: the driver's own eye on the right-hand seat. The downward tilt and lens depend on the screen so the
+      // road fills the top part and the steering wheel + gauges sit just above the thumb controls
+      tilt = upright ? 0.28 : shortLand ? 0.2 : 0.15;
+      hfov = upright ? 2 * Math.atan(Math.tan(39 * Math.PI / 180) * asp) * 180 / Math.PI : shortLand ? 104 : 100;
+      ex = upright ? 0.38 : 0.5; ey = upright ? 2.8 : 2.78; ez = upright ? 1.75 : 1.45;   // eye kept below the jhalar so the road ahead is clear to the horizon
+      lx = ex - (upright ? 0.04 : 0.05); maxV = upright ? 86 : 80;
+    } else {
+      // CABIN: sitting behind the seats, just under the roof — the driver (hands on the wheel) on the right,
+      // the conductor on the left, dashboard, windscreen and the road ahead above their heads
+      // (the eye is up at roof height, so it aims down and the roof stays a thin strip). An upright phone
+      // needs a wider lens to fit both men side by side; its stretched top and bottom sit under the HUD and pedals
+      tilt = upright ? 0.58 : shortLand ? 0.22 : 0.27;
+      hfov = upright ? clamp(2 * Math.atan(Math.tan(56 * Math.PI / 180) * asp) * 180 / Math.PI, 60, 72) : shortLand ? 108 : 104;
+      ex = 0; ey = 3.07; ez = 2.16; lx = upright ? 0.06 : 0.02; maxV = upright ? 114 : 84;
+    }
     _cp.set(ex, ey, -PL.L / 2 + ez).applyMatrix4(PL.grp.matrixWorld);
-    _cl.set(ex - (upright ? 0.04 : 0.05), ey - Math.tan(tilt) * (30 + ez), -PL.L / 2 - 30).applyMatrix4(PL.grp.matrixWorld);
-    setLens(hfov + G.v * 0.03, 0.04, upright ? 86 : 80);
+    _cl.set(lx, ey - Math.tan(tilt) * (30 + ez), -PL.L / 2 - 30).applyMatrix4(PL.grp.matrixWorld);
+    setLens(hfov + G.v * 0.03, 0.04, maxV);
     CAM.pos.copy(_cp); CAM.look.copy(_cl);
     steerPivot.userData.inner.rotation.z = -G.steer * 2.4;
+    // crew: in the driver's own view only his arms show; the conductor keeps looking around
+    if (CREW.driver){ CREW.driver.body.visible = CREW.driver.head.visible = !pov; }
+    poseCrew(steerPivot.userData.inner.rotation.z, G.steer, dt);
     // live gauges: speed 0–200 km/h, rpm from the gear model, fuel E–F
     const top = topSpeed(), gf = G.v / top * 6, gi = Math.min(5, Math.floor(gf)), rpm = G.v < 0.3 ? 0.2 : 0.25 + (gf - gi) * 0.75;
     const sweep = f => Math.PI * (0.75 - 1.5 * clamp(f, 0, 1));
@@ -2733,11 +2951,10 @@ const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="
 function musicChanged(newSong){
   const it = musicList()[MUSIC.idx], name = it ? it.name : '—';
   $('stName').textContent = name;
-  $('stereo').classList.toggle('playing', MUSIC.playing);
-  $('stPlay').innerHTML = MUSIC.playing ? ICON_PAUSE : ICON_PLAY;
-  $('mPlay').innerHTML = MUSIC.playing ? ICON_PAUSE : ICON_PLAY;
+  $('stereo').classList.toggle('playing', MUSIC.playing); $('mRail').classList.toggle('playing', MUSIC.playing);
+  for (const id of ['stPlay', 'mPlay', 'mrPlay']) $(id).innerHTML = MUSIC.playing ? ICON_PAUSE : ICON_PLAY;
   if (CAB.radio) drawRadio(MUSIC.playing ? '♪ ' + name : 'DAMAN FM 98.3');
-  if (newSong && G.mode === 'play' && G.cam !== 0) toast('♪ ' + name, 'sky');
+  if (newSong && G.mode === 'play' && !inCab()) toast('♪ ' + name, 'sky');
   renderMusic();
 }
 function drawRadio(text){
@@ -2754,6 +2971,13 @@ function renderMusic(){
       <button class="m-song" data-i="${i}"><span class="m-ico" aria-hidden="true">${i === MUSIC.idx && MUSIC.playing ? '▶' : '♪'}</span>
         <span class="m-name">${escHtml(it.name)}</span><small>${it.synth ? 'Daman FM original' : 'My song'}</small></button>
       ${it.user ? `<button class="m-del" data-id="${escHtml(it.user.id)}" aria-label="Remove ${escHtml(it.name)}">✕</button>` : ''}</li>`).join('');
+  $('mrList').innerHTML = list.map((it, i) => `<li class="${i === MUSIC.idx ? 'on' : ''}"><button data-i="${i}" aria-label="Play ${escHtml(it.name)}">
+      <i aria-hidden="true">${i === MUSIC.idx && MUSIC.playing ? '▶' : '♪'}</i><span>${escHtml(it.name)}</span></button></li>`).join('');
+  const ul = $('mrList'), on = ul.querySelector('li.on');           // keep the current song in sight (only this list scrolls)
+  if (on && ul.clientHeight){
+    const r = on.getBoundingClientRect(), u = ul.getBoundingClientRect();
+    if (r.top < u.top) ul.scrollTop += r.top - u.top; else if (r.bottom > u.bottom) ul.scrollTop += r.bottom - u.bottom;
+  }
 }
 
 /* =================================================================
@@ -2842,10 +3066,21 @@ function renderGarage(){
   const stats = [['Top speed', T.top / 160, T.top + ' km/h'], ['Pickup', T.acc / 4.6, T.acc.toFixed(1) + ' m/s²'], ['Handling', T.handling, Math.round(T.handling * 100) + '%'], ['Length', T.L / 17, T.L + ' m']];
   $('gStats').innerHTML = stats.map(([n, f, v]) => `<span>${n}</span><div class="bar"><i style="width:${Math.round(clamp(f, 0, 1) * 100)}%"></i></div><b>${v}</b>`).join('');
   $('gColors').innerHTML = '<span>Cab paint</span>' + PAINTS.map(p => `<button class="sw${p === cur ? ' on' : ''}" style="background:${p}" data-p="${p}" aria-label="Paint colour ${p}"></button>`).join('');
+  const crew = conductorFor(G.truckId);
+  $('gCrew').innerHTML = '<span>Conductor</span>' + CONDUCTOR_IDS.map(id => {
+    const L = CONDUCTORS[id], on = id === crew ? ' on' : '';
+    const av = L.shirt ? `<i class="av${L.beard ? ' beard' : ''}" style="--sh:${L.shirt};--sk:${L.skin};--tp:${L.cap || L.turban || L.hair};--bd:${L.beard || 'transparent'}"><b></b></i>`
+      : '<i class="av none">–</i>';
+    return `<button class="cw${on}" data-c="${id}" aria-pressed="${!!on}">${av}${id === 'none' ? 'None' : L.name}</button>`;
+  }).join('');
 }
 $('gColors').addEventListener('click', e => {
   const b = e.target.closest('.sw'); if (!b) return;
   G.paints[G.truckId] = b.dataset.p; store.set('paints', G.paints); buildPlayer(); renderGarage();
+});
+$('gCrew').addEventListener('click', e => {                   // each truck keeps its own conductor
+  const b = e.target.closest('.cw'); if (!b) return;
+  G.conductors[G.truckId] = b.dataset.c; store.set('conductors', G.conductors); buildCrew(b.dataset.c); renderGarage();
 });
 function cycleTruck(d){
   const i = TRUCK_IDS.indexOf(G.truckId);
@@ -3041,10 +3276,24 @@ function closeMusic(){
 }
 $('bMusic').addEventListener('click', openMusic);
 $('btnMusic').addEventListener('click', openMusic);
-$('stList').addEventListener('click', openMusic);
 $('mClose').addEventListener('click', closeMusic);
-for (const [id, fn] of [['stPrev', () => musicStep(-1)], ['stNext', () => musicStep(1)], ['stPlay', musicToggle], ['mPrev', () => musicStep(-1)], ['mNext', () => musicStep(1)], ['mPlay', musicToggle]])
+for (const [id, fn] of [['stPrev', () => musicStep(-1)], ['stNext', () => musicStep(1)], ['stPlay', musicToggle], ['mPrev', () => musicStep(-1)], ['mNext', () => musicStep(1)], ['mPlay', musicToggle],
+  ['mrPrev', () => musicStep(-1)], ['mrNext', () => musicStep(1)], ['mrPlay', musicToggle]])
   $(id).addEventListener('click', () => { MUSIC.on = 1; store.set('music', 1); fn(); });
+// the song rail on the right: remembered open/closed separately for outside views and the cab
+const RAIL = { out: store.get('railOut', 1), cab: store.get('railCab', 0) };
+function railSync(){ const open = !!(inCab() ? RAIL.cab : RAIL.out); $('mRail').classList.toggle('open', open); $('mrTab').setAttribute('aria-expanded', open); }
+function railSet(open){ if (inCab()){ RAIL.cab = open; store.set('railCab', open); } else { RAIL.out = open; store.set('railOut', open); } railSync(); }
+$('mrTab').addEventListener('click', () => { railSet(1); renderMusic(); });
+$('mrHide').addEventListener('click', () => railSet(0));
+$('mrHide2').addEventListener('click', () => railSet(0));
+$('stList').addEventListener('click', () => railSet(inCab() ? (RAIL.cab ? 0 : 1) : 1));   // stereo's list button opens the rail without stopping the truck
+$('mrMore').addEventListener('click', openMusic);
+$('mrList').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  MUSIC.on = 1; store.set('music', 1);
+  if (+b.dataset.i === MUSIC.idx) musicToggle(); else musicPlay(+b.dataset.i);
+});
 $('mList').addEventListener('click', e => {
   const del = e.target.closest('.m-del'); if (del){ removeMySong(del.dataset.id); return; }
   const b = e.target.closest('.m-song'); if (!b) return;
@@ -3062,7 +3311,7 @@ $('mFiles').addEventListener('change', e => { const f = [...e.target.files]; e.t
 /* ---------- camera ---------- */
 function updateCamLabel(){ $('camLbl').textContent = CAM_NAMES[G.cam]; }
 function setCam(i){ G.cam = i; store.set('cam', i); updateCamLabel(); }
-$('bCam').addEventListener('click', () => { setCam((G.cam + 1) % 3); toast(CAM_NAMES[G.cam] + ' VIEW'); });
+$('bCam').addEventListener('click', () => { setCam(CAM_NEXT[G.cam]); toast(CAM_NAMES[G.cam] + ' VIEW'); });
 
 /* =================================================================
    CONTROLS — keyboard, on-screen buttons, steering wheel, tilt
@@ -3147,8 +3396,8 @@ addEventListener('keydown', e => {
   if (k && G.mode === 'play'){ IN[k] = true; e.preventDefault(); }
   if (e.repeat) return;
   if (e.code === 'KeyH' && G.mode === 'play') honk(true);
-  if (e.code === 'KeyC' || e.code === 'KeyV'){ if (G.mode === 'play'){ setCam((G.cam + 1) % 3); toast(CAM_NAMES[G.cam] + ' VIEW'); } }
-  if (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3') setCam(+e.code.slice(5) - 1);
+  if (e.code === 'KeyC' || e.code === 'KeyV'){ if (G.mode === 'play'){ setCam(CAM_NEXT[G.cam]); toast(CAM_NAMES[G.cam] + ' VIEW'); } }
+  if (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3' || e.code === 'Digit4') setCam(+e.code.slice(5) - 1);
   if (e.code === 'KeyP' || e.code === 'Escape'){ if (!$('music').hidden) closeMusic(); else if (G.mode === 'play') pauseGame(); else if (G.mode === 'pause') resumeGame(); }
   if (e.code === 'KeyN'){ MUSIC.on = 1; store.set('music', 1); musicStep(1); }          // next song
   if (e.code === 'KeyM'){ G.snd = G.snd ? 0 : 1; store.set('snd', G.snd); sfx.init(); sfx.setOn(G.snd); }
@@ -3164,7 +3413,7 @@ const HUD = { spd: $('hSpeed'), gear: $('hGear'), arc: $('gArc'), fuel: $('hFuel
   hearts: $('hHearts'), coins: $('hCoins'), boost: $('boostBar'), warn: $('warn') };
 function updateHUD(){
   const kmh = Math.round(G.v * 3.6), top = topSpeed();
-  if (HL.cabin !== (G.cam === 0)){ HL.cabin = G.cam === 0; document.body.classList.toggle('cabin-view', HL.cabin); $('stereo').hidden = !HL.cabin; }   // lighter buttons + the stereo in the cab
+  if (HL.cabin !== inCab()){ HL.cabin = inCab(); document.body.classList.toggle('cabin-view', HL.cabin); $('stereo').hidden = !HL.cabin; railSync(); }   // lighter buttons + the stereo in the cab
   hset('spd', HUD.spd, String(kmh));
   hset('gear', HUD.gear, G.v < 0.4 ? 'N' : String(Math.min(6, 1 + Math.floor(G.v / top * 6))));
   const arc = Math.round(clamp(kmh / 240, 0, 1) * 100);
@@ -3255,7 +3504,7 @@ function tick(dt, draw){
   PL.grp.localToWorld(headSpot.target.position.set(0, 0.3, -PL.L / 2 - 38));
   sky.position.copy(camera.position); stars.position.copy(camera.position);
   water.position.x = camera.position.x; water.position.z = camera.position.z;
-  if (G.mode !== 'pause'){ updateWeather(dt, G.mode === 'play' ? G.v : 0, _tn, G.cam === 0 && G.mode !== 'menu'); updateParticles(dt); }
+  if (G.mode !== 'pause'){ updateWeather(dt, G.mode === 'play' ? G.v : 0, _tn, inCab() && G.mode !== 'menu'); updateParticles(dt); }
   if (G.mode === 'play'){
     updateHUD();
     const top = topSpeed(), gf = G.v / top * 6, gear = Math.min(5, Math.floor(gf));
