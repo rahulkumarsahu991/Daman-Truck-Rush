@@ -27,7 +27,7 @@
 html,body{height:100%;margin:0;overflow:hidden;background:var(--asphalt);color:var(--text);
   font-family:'Hind',system-ui,-apple-system,'Segoe UI',sans-serif;}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:none;overscroll-behavior:none}
-button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}   /* lists of buttons must still scroll on phones */
 button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .teko{font-family:'Teko','Arial Narrow',Impact,sans-serif;letter-spacing:.02em}
@@ -99,20 +99,46 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .sw.on{outline:.2em solid var(--text);outline-offset:.15em}
 
 /* ---------- routes (green highway signs) ---------- */
-.route-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(14.5em,1fr));gap:.8em}
-.sign{text-align:left;background:var(--sign);color:#fff;border-radius:.55em;padding:.8em .95em .75em;
-  box-shadow:inset 0 0 0 .2em var(--sign),inset 0 0 0 .33em #fff;display:grid;gap:.15em;position:relative}
-.sign.on{outline:.25em solid var(--amber);outline-offset:.2em}
-.sign b{font:600 1.7em/1 'Teko',sans-serif;letter-spacing:.03em}
-.sign small{opacity:.85}
-.sign .tags{display:flex;gap:.35em;flex-wrap:wrap;margin-top:.3em}
-.sign .tags em{font-style:normal;font-size:.8em;background:rgba(255,255,255,.16);border-radius:.3em;padding:.1em .45em}
+/* compact cards: a mini scene of the route (its sky, ground and road colours) on top of a green highway sign */
+.route-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.8em,1fr));gap:.6em}
+.sign{text-align:left;background:var(--sign);color:#fff;border-radius:.6em;border:.13em solid rgba(255,255,255,.92);overflow:hidden;
+  display:flex;flex-direction:column;gap:.18em;padding:0 0 .55em;position:relative;box-shadow:0 .3em .8em rgba(0,0,0,.35);transition:transform .12s}
+.sign:active{transform:scale(.97)}
+.sign.on{outline:.22em solid var(--amber);outline-offset:.14em;box-shadow:0 0 0 .5em rgba(247,147,30,.18),0 .3em .8em rgba(0,0,0,.35)}
+.sign .scene{display:block;height:2.7em;margin-bottom:.3em;position:relative;
+  background:linear-gradient(180deg,var(--sky) 0 50%,var(--gnd) 50%)}
+.sign .scene::before{content:'';position:absolute;left:50%;bottom:0;width:78%;height:50%;transform:translateX(-50%);
+  background:var(--road);clip-path:polygon(46% 0,54% 0,100% 100%,0 100%)}
+.sign .scene::after{content:'';position:absolute;left:50%;bottom:0;width:.16em;height:50%;transform:translateX(-50%);
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.9) 0 .28em,transparent .28em .55em)}
+.sign > b,.sign > small,.sign > .tags{padding:0 .65em}
+.sign b{font:600 1.3em/1.02 'Teko',sans-serif;letter-spacing:.03em;text-wrap:balance}
+.sign small{opacity:.88;font-size:.8em;line-height:1.25}
+.sign .tags{display:flex;gap:.3em;flex-wrap:wrap;margin-top:.15em}
+.sign .tags em{font-style:normal;font-size:.68em;background:rgba(255,255,255,.17);border-radius:.3em;padding:.12em .42em}
 .lbl.first{margin-top:.2em}
 .lbl-sub{margin:-.3em 0 .7em;color:var(--muted);font-size:.9em}
-.sign .rank{position:absolute;top:.6em;right:.65em;font:700 1.25em/1 'Teko',sans-serif;background:var(--amber);color:#1a1206;border-radius:.25em;padding:.22em .4em .06em}
-.sign.top b{padding-right:2.4em;text-wrap:balance}
+.sign .rank{position:absolute;top:.3em;left:.35em;font:700 1.1em/1 'Teko',sans-serif;background:var(--amber);color:#1a1206;border-radius:.25em;padding:.2em .38em .05em;box-shadow:0 .1em .3em rgba(0,0,0,.4)}
 .sign .load{display:inline-flex;align-items:center;gap:.35em}
-.sign .load i{width:.8em;height:.8em;border-radius:50%;box-shadow:0 0 0 .12em rgba(255,255,255,.7)}
+.sign .load i{width:.75em;height:.75em;border-radius:50%;flex:none;box-shadow:0 0 0 .12em rgba(255,255,255,.7)}
+.cbtn,.pedal{touch-action:none}              /* driving controls: no scrolling or zoom while held */
+/* pump name board: shows while a pump is ahead, disappears once you pass it */
+#pumpSign{position:absolute;left:50%;top:calc(var(--sat) + 7.9em);transform:translateX(-50%);display:flex;align-items:center;gap:.6em;
+  background:var(--sign);color:#fff;border:.15em solid #fff;border-radius:.6em;padding:.45em .85em .45em .55em;
+  box-shadow:0 .4em 1em rgba(0,0,0,.45);width:max-content;max-width:min(92vw,26em);animation:psIn .3s ease-out}
+#pumpSign.daman{background:var(--navy);border-color:var(--amber)}
+#pumpSign .ps-logo{width:2.7em;height:auto;border-radius:.35em;display:none;flex:none}
+#pumpSign.daman .ps-logo{display:block}
+#pumpSign.daman .ps-icon{display:none}
+#pumpSign .ps-icon{width:2.1em;height:2.1em;flex:none;color:#ffcf4a}
+#pumpSign .ps-txt{display:grid;gap:.12em;min-width:0}
+#pumpSign small{font:700 .8em/1 'Hind',sans-serif;letter-spacing:.1em;opacity:.92;font-variant-numeric:tabular-nums}
+#pumpSign b{font:700 1.6em/1 'Teko',sans-serif;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pumpSign.daman b{color:var(--amber-2)}
+#pumpSign span{font-size:.78em;color:#ffe08a}
+#hud.pump-on #toast{top:calc(var(--sat) + 13.4em)}
+@keyframes psIn{from{opacity:0;transform:translate(-50%,-.6em)}}
+@media (prefers-reduced-motion: reduce){ #pumpSign{animation:none} }
 .lbl{margin:1.1em 0 .5em;font:600 1.5em 'Teko',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .seg{display:flex;flex-wrap:wrap;gap:.45em}
 .seg button{background:var(--panel);border:1px solid var(--line);border-radius:2em;padding:.5em 1em;font-weight:600}
@@ -389,6 +415,11 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     </div>
   </div>
   <div id="boostBar" hidden><i></i></div>
+  <div id="pumpSign" hidden role="status">
+    <img class="ps-logo" data-logo alt="">
+    <svg class="ps-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h9v18H4zM6 5v5h5V5zM14 8h2l3 3v7a2 2 0 01-4 0v-4h-1v-2h3v6h0V11.8L15.6 10H14z"/></svg>
+    <div class="ps-txt"><small id="psDist">FUEL STOP</small><b id="psName"></b><span id="psTip"></span></div>
+  </div>
   <div id="toast"></div>
   <div id="warn" hidden></div>
   <div id="flash"></div>
@@ -1334,9 +1365,9 @@ function addGantry(grp, s){
     t = signTex([[R.mids[0], Math.max(4, Math.round(rem * 0.18)) + ' km'], [R.mids[1], Math.max(8, Math.round(rem * 0.5)) + ' km'], [R.to, rem + ' km']]);
   } else t = signTex([[c[1], (base) + ' km'], [c[2], (base + 64) + ' km'], [c[3], (base + 182) + ' km']]);
   const gy = new THREE.Group();
-  const posts = new THREE.Mesh(merge([tr(new THREE.CylinderGeometry(0.2, 0.25, 7.5, 8), -8, 3.75, 0), tr(new THREE.CylinderGeometry(0.2, 0.25, 7.5, 8), 8, 3.75, 0), tr(new THREE.BoxGeometry(16.5, 0.3, 0.3), 0, 7.3, 0.2)]), GANTRY_MAT);
+  const posts = new THREE.Mesh(merge([tr(new THREE.CylinderGeometry(0.2, 0.25, 9.8, 8), -8, 4.9, 0), tr(new THREE.CylinderGeometry(0.2, 0.25, 9.8, 8), 8, 4.9, 0), tr(new THREE.BoxGeometry(16.5, 0.3, 0.3), 0, 9.5, 0.2)]), GANTRY_MAT);   // tall enough that every camera passes underneath
   posts.userData.own = true; gy.add(posts);
-  const board = new THREE.Mesh(tr(new THREE.PlaneGeometry(9, 4.5), 0, 7.4, 0.4), new THREE.MeshLambertMaterial({ map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.12 }));
+  const board = new THREE.Mesh(tr(new THREE.PlaneGeometry(9, 4.5), 0, 9.7, 0.4), new THREE.MeshLambertMaterial({ map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.12 }));
   board.userData.own = true; board.userData.ownTex = true; gy.add(board);
   // board faces the approaching driver (+z side of the gantry)
   placeOnRoad(gy, s, 0, 0, 0);
@@ -2365,10 +2396,7 @@ function updatePlay(dt){
 function nextPumpK(s){ let k = Math.max(0, Math.floor(s / CH) - 1); while (!isPumpChunk(k) || pumpS(k) < s) k++; return k; }
 function updatePumps(){
   const pk = nextPumpK(G.s - 18), dsP = pumpS(pk) - G.s, pump = PUMPS[pumpIdx(pk)];
-  if (G.pumpWarned !== pk && dsP > 90 && dsP < 230 && G.time > 3){   // not over the level-start message
-    G.pumpWarned = pk;
-    toast(`FUEL STOP AHEAD — ${pump[0]}${G.fuel < 0.8 ? ' • slow down in the left lane to refuel' : ''}`, 'amber');
-  }
+  updatePumpSign(pk, dsP, pump);                                    // name board on screen until the pump is passed
   if (G.pumpUsed !== pk && Math.abs(dsP) < 16 && G.l < -1.6 && G.v < 50 / 3.6 && G.fuel < 0.97){
     G.pumpUsed = pk;
     const add = Math.min(1 - G.fuel, 0.6);
@@ -2489,12 +2517,18 @@ $('gPrev').addEventListener('click', () => cycleTruck(-1));
 $('gNext').addEventListener('click', () => cycleTruck(1));
 
 /* ---------- routes ---------- */
+const hexCss = n => '#' + (n >>> 0).toString(16).padStart(6, '0');
+// mini picture of the route in its own colours: sky (night city is dark), ground and road
+function sceneVars(r){
+  const sky = r.sides === 'city' ? '#1f2a52' : r.weather === 'snow' ? '#dfe8ef' : r.weather === 'rain' ? '#8fa0aa' : r.fogTint ? hexCss(r.fogTint) : '#8ec9ee';
+  return `--sky:${sky};--gnd:${hexCss(r.ground)};--road:${r.road}`;
+}
 function routeCard(r, i){
-  const on = i === G.route ? ' on' : '';
-  if (!r.rank) return `<button class="sign${on}" data-r="${i}"><b>${r.name}</b><small>${r.place}</small><span class="tags">${r.tags.map(t => `<em>${t}</em>`).join('')}</span></button>`;
+  const on = i === G.route ? ' on' : '', scene = `<span class="scene" aria-hidden="true"></span>`;
+  if (!r.rank) return `<button class="sign${on}" data-r="${i}" style="${sceneVars(r)}">${scene}<b>${r.name}</b><small>${r.place}</small><span class="tags">${r.tags.map(t => `<em>${t}</em>`).join('')}</span></button>`;
   const cg = CARGO[r.item];
-  return `<button class="sign top${on}" data-r="${i}" aria-label="Rank ${r.rank}: ${r.name}, ${cg.name}${r.trips ? ', ' + r.trips + ' trips' : ''}">
-    <span class="rank">#${r.rank}</span><b>${r.name}</b>
+  return `<button class="sign top${on}" data-r="${i}" style="${sceneVars(r)}" aria-label="Rank ${r.rank}: ${r.name}, ${cg.name}${r.trips ? ', ' + r.trips + ' trips' : ''}">
+    ${scene}<span class="rank">#${r.rank}</span><b>${r.name}</b>
     <small class="load"><i style="background:${cg.hex}"></i>${cg.name} • ${r.km} km${r.mt ? ' • ' + r.mt + ' MT avg' : ''}</small>
     <span class="tags">${r.trips ? `<em>${r.trips} trips</em>` : ''}<em>${r.themeTag}</em></span></button>`;
 }
@@ -2551,7 +2585,7 @@ function onRunStart(){
   HL = {};
   resetInputs(); applyControlMode(); updateCamLabel();
   if (G.ctl === 'tilt') enableTilt();
-  showCoach();
+  showCoach(); hidePumpSign();
   $('hLevel').textContent = G.endless ? 'ENDLESS' : 'LEVEL ' + G.level;
   $('hTier').textContent = TIERS[G.cfg.tier][0];
   const job = jobText();
@@ -2560,6 +2594,19 @@ function onRunStart(){
   if (!IS_TOUCH && !kbHintShown){ kbHintShown = true; setTimeout(() => { if (G.mode === 'play') toast('Arrows drive • C camera • H horn • P pause'); }, 2200); }
   try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {}
 }
+// pump name board: appears ~320 m before a pump with a live distance, and hides once the truck has passed it
+const PS = { k: -1, d: '', tip: '' };
+function updatePumpSign(pk, dsP, pump){
+  const el = $('pumpSign'), show = G.mode === 'play' && dsP < 320 && dsP > -8;
+  if (el.hidden === show){ el.hidden = !show; $('hud').classList.toggle('pump-on', show); }
+  if (!show) return;
+  if (PS.k !== pk){ PS.k = pk; $('psName').textContent = pump[0]; el.classList.toggle('daman', pumpIdx(pk) === 0); }
+  const d = dsP > 12 ? `FUEL STOP  •  ${Math.max(10, Math.round(dsP / 10) * 10)} m` : 'FUEL STOP  •  HERE';
+  if (PS.d !== d){ PS.d = d; $('psDist').textContent = d; }
+  const tip = G.pumpUsed === pk ? 'Tank refilled ✓' : G.fuel < 0.97 ? 'Slow down in the left lane to refuel' : 'Tank is full';
+  if (PS.tip !== tip){ PS.tip = tip; $('psTip').textContent = tip; }
+}
+function hidePumpSign(){ PS.k = -1; $('pumpSign').hidden = true; $('hud').classList.remove('pump-on'); }
 // on phones, the first 3 runs point out where steering, accelerator (RACE) and BRAKE are
 let coachTimer = 0;
 function showCoach(){
@@ -2572,7 +2619,7 @@ function showCoach(){
   clearTimeout(coachTimer); coachTimer = setTimeout(() => { $('coach').hidden = true; }, 7000);
 }
 function onRunEnd(ok, reason, stars, dist){
-  $('coach').hidden = true;
+  $('coach').hidden = true; hidePumpSign();
   sfx.engine(false, 0, 0); sfx.horn(false); if (ok) sfx.win();
   resetInputs();
   $('controls').hidden = true;
