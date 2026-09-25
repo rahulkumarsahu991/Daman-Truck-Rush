@@ -139,6 +139,53 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 #hud.pump-on #toast{top:calc(var(--sat) + 13.4em)}
 @keyframes psIn{from{opacity:0;transform:translate(-50%,-.6em)}}
 @media (prefers-reduced-motion: reduce){ #pumpSign{animation:none} }
+/* in-truck stereo (cabin view): black faceplate, glowing LCD, chunky buttons */
+#stereo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 1.1em);display:flex;align-items:center;gap:.45em;
+  width:max-content;max-width:min(94vw,25em);padding:.4em .45em;border-radius:.65em;pointer-events:auto;
+  background:linear-gradient(#2a2c33,#0c0d10);border:.12em solid #70757f;box-shadow:0 .4em 1.1em rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.14)}
+.st-lcd{background:#031412;border-radius:.35em;padding:.28em .55em .22em;min-width:7.5em;max-width:10.5em;display:grid;box-shadow:inset 0 0 .6em rgba(0,0,0,.9)}
+.st-lcd small{font:700 .58em/1 'Hind',sans-serif;letter-spacing:.16em;color:#1f9d8c}
+.st-lcd b{font:600 1.1em/1.1 'Teko',sans-serif;letter-spacing:.03em;color:#43f0d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 .45em rgba(67,240,214,.55)}
+.st-eq{display:flex;align-items:flex-end;gap:.12em;height:1.5em}
+.st-eq i{width:.22em;height:25%;background:linear-gradient(#ffcf4a,#f7931e);border-radius:.1em}
+#stereo.playing .st-eq i{animation:eq .7s ease-in-out infinite alternate}
+#stereo.playing .st-eq i:nth-child(2){animation-duration:.45s}
+#stereo.playing .st-eq i:nth-child(3){animation-duration:.62s}
+#stereo.playing .st-eq i:nth-child(4){animation-duration:.38s}
+#stereo.playing .st-eq i:nth-child(5){animation-duration:.55s}
+@keyframes eq{to{height:100%}}
+.st-btns{display:flex;gap:.28em}
+.st-btns button{width:2.45em;height:2.45em;border-radius:.45em;display:grid;place-items:center;color:#eceae3;touch-action:none;
+  background:linear-gradient(#41444d,#1c1e23);border:1px solid #5b6069;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.st-btns button:active{transform:translateY(1px);background:#f7931e;color:#1a1206}
+.st-btns svg{width:1.1em;height:1.1em}
+/* upright phone: stereo sits under the HUD, pump board moves below it */
+@media (orientation: portrait){
+  #stereo{bottom:auto;top:calc(var(--sat) + 8.1em)}
+  .cabin-view #pumpSign{top:calc(var(--sat) + 12.3em)}
+}
+@media (prefers-reduced-motion: reduce){ #stereo.playing .st-eq i{animation:none;height:70%} }
+/* song list */
+.music-card{gap:.7em}
+.m-head{display:flex;align-items:center;gap:.7em}
+.m-head .mini-logo{margin:0;width:3em}
+.m-head h2{text-align:left;font-size:2.2em}
+.m-now{margin:0;color:#43f0d6;font-weight:600;font-size:.9em}
+.m-ctl{display:flex;justify-content:center;gap:.6em}
+.m-btn{width:3em;height:3em;border-radius:50%;display:grid;place-items:center;background:linear-gradient(#41444d,#1c1e23);border:1px solid #5b6069;color:#fff}
+.m-btn.big{width:3.6em;height:3.6em;background:var(--amber);border-color:var(--amber-2);color:#1a1206}
+.m-btn svg{width:1.3em;height:1.3em}
+.m-list{list-style:none;margin:0;padding:0;display:grid;gap:.35em;max-height:40vh;overflow:auto;touch-action:pan-y}
+.m-list li{display:flex;gap:.35em}
+.m-song{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;column-gap:.6em;align-items:center;text-align:left;
+  padding:.5em .7em;border-radius:.55em;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.m-song small{grid-column:2;color:var(--muted);font-size:.75em}
+.m-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-ico{grid-row:span 2;width:1.8em;height:1.8em;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);color:var(--amber-2)}
+.m-list li.on .m-song{border-color:var(--amber);background:rgba(247,147,30,.14)}
+.m-list li.on .m-ico{background:var(--amber);color:#1a1206}
+.m-del{width:2.4em;border-radius:.55em;background:rgba(255,75,62,.12);border:1px solid rgba(255,75,62,.4);color:#ff8a80}
+.m-note{margin:0;color:var(--muted);font-size:.8em;line-height:1.4}
 .lbl{margin:1.1em 0 .5em;font:600 1.5em 'Teko',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .seg{display:flex;flex-wrap:wrap;gap:.45em}
 .seg button{background:var(--panel);border:1px solid var(--line);border-radius:2em;padding:.5em 1em;font-weight:600}
@@ -332,6 +379,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
       <button id="btnPlay" class="btn big">Play</button>
       <div class="menu-row">
         <button id="btnSettings" class="btn ghost">Settings</button>
+        <button id="btnMusic" class="btn ghost">Music</button>
         <button id="btnFull" class="btn ghost">Fullscreen</button>
       </div>
     </div>
@@ -409,12 +457,23 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     <div class="hud-right">
       <div class="tbtns">
         <button id="bCam" class="ibtn" aria-label="Change camera view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg><small id="camLbl">BODY</small></button>
+        <button id="bMusic" class="ibtn" aria-label="Music"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 17.5a3 3 0 11-2-2.83V5l12-2v11.5a3 3 0 11-2-2.83V7.2l-8 1.33z"/></svg></button>
         <button id="bPause" class="ibtn" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
       </div>
       <div class="pnl meta"><span id="hHearts" class="hearts"></span><b id="hCoins">₹0</b></div>
     </div>
   </div>
   <div id="boostBar" hidden><i></i></div>
+  <div id="stereo" hidden>
+    <div class="st-lcd"><small>DAMAN FM 98.3</small><b id="stName">—</b></div>
+    <span class="st-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    <div class="st-btns">
+      <button id="stPrev" aria-label="Previous song"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button id="stPlay" aria-label="Play or pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
+      <button id="stNext" aria-label="Next song"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <button id="stList" aria-label="All songs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+    </div>
+  </div>
   <div id="pumpSign" hidden role="status">
     <img class="ps-logo" data-logo alt="">
     <svg class="ps-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h9v18H4zM6 5v5h5V5zM14 8h2l3 3v7a2 2 0 01-4 0v-4h-1v-2h3v6h0V11.8L15.6 10H14z"/></svg>
@@ -468,9 +527,26 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
       <div class="opt"><span>Camera</span><div class="seg" data-set="cam"><button data-v="0">Cabin</button><button data-v="1">Body</button><button data-v="2">Drone</button></div></div>
       <div class="opt"><span>Accelerator</span><div class="seg" data-set="auto"><button data-v="0">Hold GAS</button><button data-v="1">Auto accelerate</button></div></div>
       <div class="opt"><span>Sound</span><div class="seg" data-set="snd"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+      <div class="opt"><span>Music (Daman FM)</span><div class="seg" data-set="music"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
       <div class="opt"><span>Graphics</span><div class="seg" data-set="gfx"><button data-v="auto">Auto</button><button data-v="low">Smooth (low)</button><button data-v="high">Sharp (high)</button></div></div>
     </div>
     <div class="row"><button id="sClose" class="btn">Done</button></div>
+  </div>
+</div>
+
+<div id="music" class="modal" hidden>
+  <div class="card music-card">
+    <div class="m-head"><img class="mini-logo" data-logo alt=""><div><h2>DAMAN FM</h2><p id="mNow" class="m-now"></p></div></div>
+    <div class="m-ctl">
+      <button id="mPrev" class="m-btn" aria-label="Previous song"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button id="mPlay" class="m-btn big" aria-label="Play or pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
+      <button id="mNext" class="m-btn" aria-label="Next song"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+    </div>
+    <ul id="mList" class="m-list"></ul>
+    <button id="mAdd" class="btn ghost">+ Add songs from this phone</button>
+    <input id="mFiles" type="file" accept="audio/*" multiple hidden>
+    <p class="m-note">Film songs can't be built into the game because they're copyrighted. Add MP3s you already have on this phone or laptop: they play in your truck and stay on this device only.</p>
+    <div class="row"><button id="mClose" class="btn">Done</button></div>
   </div>
 </div>
 
@@ -1763,6 +1839,7 @@ function makeCockpit(){
   box(plast2, 0.46, 0.34, 0.08, -0.1, 1.9, 0.64, -0.35);
   const fm = canvasTex(256, 64, (c, w, h) => { c.fillStyle = '#041614'; c.fillRect(0, 0, w, h); c.fillStyle = '#35e0c8'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `700 40px ${FONT_D}`; c.fillText('DAMAN FM 98.3', w / 2, h / 2 + 3); });
   add(tr(new THREE.PlaneGeometry(0.3, 0.075), -0.1, 1.98, 0.69, -0.35), new THREE.MeshBasicMaterial({ map: fm }));
+  CAB.radio = { ctx: fm.image.getContext('2d'), tex: fm };            // the music system writes the song name here
   for (const vx of [-0.24, 0.04]) box(black, 0.11, 0.07, 0.02, vx, 1.86, 0.685, -0.35);
   // Daman sticker on the passenger side of the dash
   add(tr(new THREE.PlaneGeometry(0.3, 0.265), -0.62, 2.1, 0.42, -1.1), MAT.logo);
@@ -2419,6 +2496,267 @@ function endRun(ok, reason){
 }
 
 /* =================================================================
+   DAMAN FM — the in-truck music system
+   Built-in songs are ORIGINAL tunes composed in code and synthesised
+   live with Web Audio (no recordings, nothing to license). Players can
+   also add their own songs from their phone/laptop: those files stay on
+   that device (IndexedDB) and are never uploaded anywhere.
+   ================================================================= */
+const SCALES = { mixo: [0, 2, 4, 5, 7, 9, 10], kafi: [0, 2, 3, 5, 7, 9, 10], pahadi: [0, 2, 4, 7, 9], major: [0, 2, 4, 5, 7, 9, 11], bhairav: [0, 1, 4, 5, 7, 8, 11] };
+const DRUMS = {                     // one character per 16th step: x = strong hit, o = soft hit, . = rest
+  bhangra: { steps: 16, dhol: 'x.....x...x.....', slap: '..x.x...x.x.x.x.', shaker: 'o.o.o.o.o.o.o.o.' },
+  keherwa: { steps: 16, ge: 'x.......x.o.....', na: '..x.x.x...x.x.x.', shaker: '....o.......o...' },
+  dadra:   { steps: 12, ge: 'x.....x.....', na: '..x.x...x.x.', shaker: 'o.o.o.o.o.o.' },
+  stomp:   { steps: 16, kick: 'x...x...x...x...', clap: '....x.......x...', shaker: 'o.o.o.o.o.o.o.o.' },
+  waltz:   { steps: 12, kick: 'x...........', na: '....o...o...', shaker: '..o...o...o.' },
+  qawwali: { steps: 16, clap: 'x...x.x.x...x.x.', ge: 'x.....x.x.......', na: '..x.x.....x.x...' },
+};
+const SONGS = [
+  { name: 'Highway Bhangra',   bpm: 158, drum: 'bhangra', scale: 'mixo',    root: 62, seed: 11, lead: 'tumbi',     pad: null,        prog: [0, 3, 4, 0] },
+  { name: 'Pardes Ki Yaad',    bpm: 84,  drum: 'keherwa', scale: 'kafi',    root: 62, seed: 23, lead: 'bansuri',   pad: 'harmonium', prog: [0, 5, 3, 4] },
+  { name: 'Baarish Wali Sadak',bpm: 132, drum: 'dadra',   scale: 'pahadi',  root: 64, seed: 37, lead: 'santoor',   pad: 'strings',   prog: [0, 3, 1, 4] },
+  { name: 'Jeet Ka Jashn',     bpm: 126, drum: 'stomp',   scale: 'mixo',    root: 60, seed: 41, lead: 'brass',     pad: 'strings',   prog: [0, 4, 5, 3] },
+  { name: 'Purana Safar',      bpm: 138, drum: 'waltz',   scale: 'major',   root: 60, seed: 53, lead: 'accordion', pad: 'mandolin',  prog: [0, 3, 4, 0] },
+  { name: 'Dhaba Qawwali',     bpm: 104, drum: 'qawwali', scale: 'bhairav', root: 62, seed: 67, lead: 'harmonium', pad: null,        prog: [0, 3, 4, 0] },
+];
+const MUSIC = { on: store.get('music', 1), idx: store.get('musicIdx', 0), playing: false, ctx: null, bus: null, noise: null,
+  timer: 0, next: 0, step: 0, stepDur: 0.1, cur: null, comp: null, el: null, url: null, mine: [] };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function degMidi(S, d){ const sc = SCALES[S.scale], n = sc.length; return S.root + 12 * Math.floor(d / n) + sc[((d % n) + n) % n]; }
+
+// a song = two 2-bar phrases (A, B) played A A B A, over the drum groove and a 4-bar chord cycle
+function composeSong(S){
+  const r = rng(S.seed * 7919), n = SCALES[S.scale].length, steps = DRUMS[S.drum].steps;
+  const RHY = steps === 16 ? ['x.x.x...x.x.x...', 'x...x.x.x...x...', 'x.x.x.x.x...x.x.', 'x.....x.x.x.x...', 'x...x...x.x.x.x.']
+                           : ['x.x.x.x.....', 'x...x.x.x...', 'x.....x.x.x.', 'x.x...x...x.'];
+  const phrase = () => {
+    let deg = n + ((r() * 3) | 0);
+    const bars = [0, 1].map(() => {
+      const rh = RHY[(r() * RHY.length) | 0], notes = [];
+      for (let i = 0; i < steps; i++) if (rh[i] === 'x'){ deg = clamp(deg + [-2, -1, -1, 0, 1, 1, 2, 3][(r() * 8) | 0], 0, n * 2); notes.push([i, deg]); }
+      return notes;
+    });
+    const last = bars[1][bars[1].length - 1]; if (last) last[1] = Math.round(last[1] / n) * n;   // land on the home note
+    return bars;
+  };
+  const A = phrase(), B = phrase();
+  return { form: [A, A, B, A] };
+}
+
+/* ---------- instruments ---------- */
+function voice(type, f, t, dur, vol, o){
+  o = o || {};
+  const ctx = MUSIC.ctx, osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(f, t);
+  if (o.detune) osc.detune.value = o.detune;
+  if (o.bend) osc.frequency.exponentialRampToValueAtTime(f * o.bend, t + (o.bendT || 0.1));
+  let out = osc;
+  if (o.lp){
+    const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(o.lp, t);
+    if (o.lpEnd) fl.frequency.exponentialRampToValueAtTime(o.lpEnd, t + dur);
+    osc.connect(fl); out = fl;
+  }
+  out.connect(g); g.connect(MUSIC.bus);
+  const a = o.a || 0.005, rel = o.r || 0.08;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + a);
+  if (o.decay) g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol * o.decay), t + Math.max(a + 0.01, dur));
+  else g.gain.setValueAtTime(vol, t + Math.max(a, dur - rel));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur + rel);
+  if (o.vib){
+    const lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = o.vib; lg.gain.value = f * 0.007; lfo.connect(lg); lg.connect(osc.frequency);
+    lfo.start(t + 0.12); lfo.stop(t + dur + rel);
+  }
+  osc.start(t); osc.stop(t + dur + rel + 0.02);
+}
+function noiseHit(t, dur, vol, type, freq, q){
+  const ctx = MUSIC.ctx, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = MUSIC.noise; f.type = type; f.frequency.value = freq; if (q) f.Q.value = q;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f); f.connect(g); g.connect(MUSIC.bus); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+}
+function drum(k, t, v){
+  switch (k){
+    case 'dhol': voice('sine', 100, t, 0.3, 0.5 * v, { bend: 0.46, bendT: 0.22, decay: 0.01 }); noiseHit(t, 0.03, 0.12 * v, 'lowpass', 500); break;
+    case 'slap': noiseHit(t, 0.09, 0.22 * v, 'bandpass', 1100, 2); voice('sine', 360, t, 0.07, 0.08 * v, { bend: 0.9, decay: 0.05 }); break;
+    case 'ge':   voice('sine', 88, t, 0.4, 0.34 * v, { bend: 1.6, bendT: 0.15, decay: 0.02 }); break;          // bayan: the rising "ge" bend
+    case 'na':   voice('sine', 560, t, 0.2, 0.11 * v, { decay: 0.02 }); noiseHit(t, 0.03, 0.06 * v, 'bandpass', 3500, 1); break;
+    case 'kick': voice('sine', 130, t, 0.24, 0.5 * v, { bend: 0.35, bendT: 0.2, decay: 0.01 }); break;
+    case 'clap': for (const d of [0, 0.012, 0.024]) noiseHit(t + d, 0.05, 0.16 * v, 'bandpass', 1400, 0.8); noiseHit(t + 0.03, 0.14, 0.08 * v, 'bandpass', 1400, 0.8); break;
+    case 'shaker': noiseHit(t, 0.04, 0.05 * v, 'highpass', 6500); break;
+  }
+}
+function lead(kind, t, m, dur){
+  const f = mtof(m);
+  switch (kind){
+    case 'tumbi':    voice('square', f, t, Math.min(dur, 0.18), 0.06, { lp: 3800, decay: 0.05, bend: 1.02, bendT: 0.03, r: 0.05 }); voice('square', f * 2, t, 0.08, 0.015, { lp: 5000, decay: 0.05 }); break;
+    case 'bansuri':  voice('sine', f, t, dur * 0.95, 0.11, { a: 0.05, r: 0.12, vib: 5.5 }); voice('triangle', f, t, dur * 0.95, 0.03, { a: 0.06, r: 0.12 }); noiseHit(t, 0.08, 0.012, 'bandpass', 2400, 1); break;
+    case 'santoor':  voice('triangle', f, t, 0.55, 0.09, { decay: 0.02, r: 0.3 }); voice('sine', f * 2.01, t, 0.35, 0.03, { decay: 0.02, r: 0.2 }); voice('triangle', f, t + 0.06, 0.4, 0.035, { decay: 0.02, r: 0.2 }); break;
+    case 'brass':    voice('sawtooth', f, t, dur * 0.9, 0.05, { a: 0.03, lp: 900, lpEnd: 2600, r: 0.1 }); voice('sawtooth', f, t, dur * 0.9, 0.035, { a: 0.03, lp: 1400, detune: 9, r: 0.1 }); break;
+    case 'accordion':voice('square', f, t, dur * 0.95, 0.03, { a: 0.04, lp: 2400, detune: -6, vib: 7 }); voice('sawtooth', f, t, dur * 0.95, 0.026, { a: 0.04, lp: 2000, detune: 6 }); break;
+    case 'harmonium':voice('sawtooth', f, t, dur * 0.95, 0.04, { a: 0.06, lp: 1600, detune: -5 }); voice('square', f, t, dur * 0.95, 0.026, { a: 0.06, lp: 1400, detune: 5 }); break;
+  }
+}
+function pad(kind, t, ms, dur){
+  if (kind === 'mandolin'){                         // tremolo-picked chord, the old-film sound
+    for (let k = 0, tt = t; tt < t + dur - 0.05; k++, tt += 0.09) voice('triangle', mtof(ms[k % ms.length] + 12), tt, 0.08, 0.022, { decay: 0.1, r: 0.04 });
+    return;
+  }
+  for (const m of ms){
+    if (kind === 'harmonium') voice('sawtooth', mtof(m), t, dur, 0.016, { a: 0.25, lp: 1100, r: 0.3 });
+    else voice('sawtooth', mtof(m), t, dur, 0.012, { a: 0.4, lp: 900, r: 0.5, detune: (Math.random() - 0.5) * 14 });
+  }
+}
+function bassNote(t, m, dur){ voice('triangle', mtof(m), t, dur, 0.15, { lp: 520, r: 0.06 }); voice('sine', mtof(m), t, dur, 0.09, { r: 0.06 }); }
+
+/* ---------- sequencer (schedules ~0.14 s ahead) ---------- */
+function scheduleStep(t){
+  const S = MUSIC.cur, D = DRUMS[S.drum], steps = D.steps, st = MUSIC.step % steps, bar = Math.floor(MUSIC.step / steps);
+  if (st === 0 && bar >= 66){ musicPlay(MUSIC.idx + 1, true); return; }        // ~2–3 minutes, then next song
+  const intro = bar < 2, brk = bar % 32 >= 28;                                   // 2-bar drum intro; a short break every 32 bars
+  t += (Math.random() - 0.5) * 0.004;
+  for (const k of ['dhol', 'slap', 'ge', 'na', 'kick', 'clap', 'shaker']){ const p = D[k]; if (p && p[st] !== '.') drum(k, t, p[st] === 'x' ? 1 : 0.55); }
+  if (intro) return;
+  const chord = S.prog[bar % 4], half = steps / 2;
+  if (st === 0 || st === half) bassNote(t, degMidi(S, chord) - 24, MUSIC.stepDur * half * 0.9);
+  if (S.pad && st === 0) pad(S.pad, t, [chord, chord + 2, chord + 4].map(d => degMidi(S, d) - 12), MUSIC.stepDur * steps);
+  if (brk) return;
+  const ph = MUSIC.comp.form[Math.floor((bar - 2) / 2) % 4], notes = ph[(bar - 2) % 2];
+  for (let j = 0; j < notes.length; j++) if (notes[j][0] === st){
+    const nxt = notes[j + 1] ? notes[j + 1][0] : steps;
+    lead(S.lead, t, degMidi(S, notes[j][1]) + 12, (nxt - st) * MUSIC.stepDur);
+  }
+}
+function musicTick(){
+  if (!MUSIC.cur || !MUSIC.playing) return;
+  const now = MUSIC.ctx.currentTime;
+  if (MUSIC.next < now - 0.3) MUSIC.next = now + 0.02;                            // fell behind (tab was in the background)
+  while (MUSIC.cur && MUSIC.next < now + 0.14){
+    const cur = MUSIC.cur; scheduleStep(MUSIC.next);
+    if (MUSIC.cur !== cur) break;
+    MUSIC.next += MUSIC.stepDur; MUSIC.step++;
+  }
+}
+
+/* ---------- player ---------- */
+function ensureMusicBus(){
+  sfx.init(); const a = sfx.audio(); if (!a) return false;
+  MUSIC.ctx = a.ctx;
+  if (!MUSIC.bus){
+    MUSIC.bus = a.ctx.createGain(); MUSIC.bus.gain.value = 0.55; MUSIC.bus.connect(a.master);
+    MUSIC.noise = a.ctx.createBuffer(1, a.ctx.sampleRate, a.ctx.sampleRate);
+    const d = MUSIC.noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return true;
+}
+function musicList(){ return SONGS.map(s => ({ name: s.name, synth: s })).concat(MUSIC.mine.map(u => ({ name: u.name, user: u }))); }
+function musicStopSources(){ clearInterval(MUSIC.timer); MUSIC.timer = 0; MUSIC.cur = null; if (MUSIC.el) MUSIC.el.pause(); }
+function musicPlay(i, auto){
+  const list = musicList(); if (!list.length || !ensureMusicBus()) return;
+  MUSIC.idx = ((i % list.length) + list.length) % list.length; store.set('musicIdx', MUSIC.idx);
+  musicStopSources();
+  const it = list[MUSIC.idx]; MUSIC.playing = true;
+  if (it.synth){
+    MUSIC.cur = it.synth; MUSIC.comp = composeSong(it.synth); MUSIC.step = 0; MUSIC.stepDur = 60 / it.synth.bpm / 4;
+    MUSIC.next = MUSIC.ctx.currentTime + 0.08; MUSIC.timer = setInterval(musicTick, 40);
+  } else playMySong(it.user);
+  musicChanged(true);
+}
+function playMySong(u){
+  if (!MUSIC.el){
+    MUSIC.el = new Audio(); MUSIC.el.preload = 'auto';
+    try { MUSIC.ctx.createMediaElementSource(MUSIC.el).connect(MUSIC.bus); } catch (e) {}
+    MUSIC.el.addEventListener('ended', () => musicPlay(MUSIC.idx + 1, true));
+  }
+  if (MUSIC.url) URL.revokeObjectURL(MUSIC.url);
+  MUSIC.url = URL.createObjectURL(u.blob); MUSIC.el.src = MUSIC.url;
+  MUSIC.el.play().catch(() => {});
+}
+function musicPause(){ MUSIC.playing = false; clearInterval(MUSIC.timer); MUSIC.timer = 0; if (MUSIC.el) MUSIC.el.pause(); musicChanged(false); }
+function musicResume(){
+  if (!ensureMusicBus()) return;
+  const it = musicList()[MUSIC.idx];
+  if (!it) return musicPlay(0);
+  if (it.synth && MUSIC.cur === it.synth){ MUSIC.playing = true; MUSIC.next = MUSIC.ctx.currentTime + 0.05; clearInterval(MUSIC.timer); MUSIC.timer = setInterval(musicTick, 40); musicChanged(false); }
+  else if (it.user && MUSIC.el && MUSIC.el.src){ MUSIC.playing = true; MUSIC.el.play().catch(() => {}); musicChanged(false); }
+  else musicPlay(MUSIC.idx);
+}
+function musicToggle(){ if (MUSIC.playing) musicPause(); else musicResume(); }
+function musicStep(d){ musicPlay(MUSIC.idx + d); }
+
+/* ---------- the player's own songs, kept on this device only ---------- */
+const MDB = { db: null };
+function mdbOpen(){
+  return new Promise(res => {
+    if (MDB.db) return res(MDB.db);
+    try {
+      const rq = indexedDB.open('dtr3d_music', 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore('songs', { keyPath: 'id', autoIncrement: true });
+      rq.onsuccess = () => res(MDB.db = rq.result); rq.onerror = () => res(null);
+    } catch (e){ res(null); }
+  });
+}
+async function loadMySongs(){
+  const db = await mdbOpen(); if (!db) return;
+  try {
+    const rq = db.transaction('songs').objectStore('songs').getAll();
+    rq.onsuccess = () => { MUSIC.mine = (rq.result || []).map(r => ({ id: r.id, name: r.name, blob: r.blob })); renderMusic(); };
+  } catch (e){}
+}
+async function addMySongs(files){
+  const db = await mdbOpen(), added = [];
+  for (const f of files){
+    if (!/^audio\//.test(f.type) && !/\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(f.name)) continue;
+    const item = { name: f.name.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').slice(0, 60), blob: f };
+    if (db){
+      try { item.id = await new Promise((res, rej) => { const rq = db.transaction('songs', 'readwrite').objectStore('songs').add(item); rq.onsuccess = () => res(rq.result); rq.onerror = rej; }); }
+      catch (e){ item.id = 'tmp' + Math.random(); }                            // storage full: keep for this session only
+    } else item.id = 'tmp' + Math.random();
+    MUSIC.mine.push(item); added.push(item);
+  }
+  renderMusic();
+  if (added.length){ toast(added.length === 1 ? `Added: ${added[0].name}` : `${added.length} songs added`, 'good'); musicPlay(SONGS.length + MUSIC.mine.indexOf(added[0])); }
+  else toast('Pick audio files (MP3, M4A…)', 'bad');
+}
+async function removeMySong(id){
+  const i = MUSIC.mine.findIndex(u => String(u.id) === String(id)); if (i < 0) return;
+  const playingIt = musicList()[MUSIC.idx], wasPlaying = playingIt && playingIt.user && String(playingIt.user.id) === String(id);
+  const item = MUSIC.mine.splice(i, 1)[0];
+  const db = await mdbOpen(); if (db && typeof item.id === 'number') try { db.transaction('songs', 'readwrite').objectStore('songs').delete(item.id); } catch (e){}
+  if (wasPlaying) musicPlay(0); else { if (MUSIC.idx >= musicList().length) MUSIC.idx = 0; renderMusic(); }
+}
+
+/* ---------- display: stereo in the HUD, song list, and the 3D dashboard radio ---------- */
+const escHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+function musicChanged(newSong){
+  const it = musicList()[MUSIC.idx], name = it ? it.name : '—';
+  $('stName').textContent = name;
+  $('stereo').classList.toggle('playing', MUSIC.playing);
+  $('stPlay').innerHTML = MUSIC.playing ? ICON_PAUSE : ICON_PLAY;
+  $('mPlay').innerHTML = MUSIC.playing ? ICON_PAUSE : ICON_PLAY;
+  if (CAB.radio) drawRadio(MUSIC.playing ? '♪ ' + name : 'DAMAN FM 98.3');
+  if (newSong && G.mode === 'play' && G.cam !== 0) toast('♪ ' + name, 'sky');
+  renderMusic();
+}
+function drawRadio(text){
+  const c = CAB.radio.ctx, w = 256, h = 64;
+  c.fillStyle = '#041614'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#35e0c8'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  fitText(c, text, w - 16, 40, 700, FONT_D); c.fillText(text, w / 2, h / 2 + 3);
+  CAB.radio.tex.needsUpdate = true;
+}
+function renderMusic(){
+  const list = musicList(), cur = list[MUSIC.idx];
+  $('mNow').textContent = cur ? (MUSIC.playing ? 'Now playing: ' : 'Paused: ') + cur.name : '';
+  $('mList').innerHTML = list.map((it, i) => `<li class="${i === MUSIC.idx ? 'on' : ''}">
+      <button class="m-song" data-i="${i}"><span class="m-ico" aria-hidden="true">${i === MUSIC.idx && MUSIC.playing ? '▶' : '♪'}</span>
+        <span class="m-name">${escHtml(it.name)}</span><small>${it.synth ? 'Daman FM original' : 'My song'}</small></button>
+      ${it.user ? `<button class="m-del" data-id="${escHtml(it.user.id)}" aria-label="Remove ${escHtml(it.name)}">✕</button>` : ''}</li>`).join('');
+}
+
+/* =================================================================
    SOUND — tiny WebAudio synth (engine, horn, air brake, pickups)
    ================================================================= */
 const sfx = (() => {
@@ -2453,6 +2791,7 @@ const sfx = (() => {
   }
   return {
     init,
+    audio(){ return ctx ? { ctx, master } : null; },          // shared with the music system
     setOn(on){ if (master) master.gain.value = on ? 0.8 : 0; },
     engine(on, rpm, thr){
       if (!ctx) return; const t = ctx.currentTime, f = 26 + rpm * 64;
@@ -2585,6 +2924,7 @@ function onRunStart(){
   HL = {};
   resetInputs(); applyControlMode(); updateCamLabel();
   if (G.ctl === 'tilt') enableTilt();
+  if (MUSIC.on && !MUSIC.playing) musicResume();                  // Daman FM comes on when you start driving
   showCoach(); hidePumpSign();
   $('hLevel').textContent = G.endless ? 'ENDLESS' : 'LEVEL ' + G.level;
   $('hTier').textContent = TIERS[G.cfg.tier][0];
@@ -2654,9 +2994,12 @@ $('pQuit').addEventListener('click', () => { parkTruck(); show('home'); });
   b.addEventListener('click', openSettings);
   const row = document.createElement('div'); row.className = 'row'; row.appendChild(b); $('pSettingsSlot').appendChild(row);
 }
-document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseGame();
+  const a = sfx.audio(); if (a) (document.hidden ? a.ctx.suspend() : a.ctx.resume()).catch(() => {});   // no music from a locked phone
+});
 function renderSettings(){
-  const vals = { ctl: G.ctl, cam: G.cam, auto: G.autoGas, snd: G.snd, gfx: G.gfx };
+  const vals = { ctl: G.ctl, cam: G.cam, auto: G.autoGas, snd: G.snd, gfx: G.gfx, music: MUSIC.on };
   document.querySelectorAll('#settingsBody .seg').forEach(seg => {
     const v = String(vals[seg.dataset.set]);
     seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
@@ -2673,6 +3016,7 @@ $('settingsBody').addEventListener('click', e => {
   if (key === 'auto'){ G.autoGas = +v; store.set('auto', G.autoGas); }
   if (key === 'snd'){ G.snd = +v; store.set('snd', G.snd); sfx.init(); sfx.setOn(G.snd); }
   if (key === 'gfx'){ G.gfx = v; store.set('gfx', v); applyGfx(); }
+  if (key === 'music'){ MUSIC.on = +v; store.set('music', MUSIC.on); if (MUSIC.on) musicResume(); else musicPause(); }
   renderSettings();
 });
 $('btnFull').addEventListener('click', () => {
@@ -2683,6 +3027,37 @@ $('btnFull').addEventListener('click', () => {
     } else (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   } catch (e){ toast('Fullscreen is not available here', 'bad'); }
 });
+
+/* ---------- music system (Daman FM) ---------- */
+let musicPausedGame = false;
+function openMusic(){
+  sfx.init();
+  if (G.mode === 'play'){ G.mode = 'pause'; musicPausedGame = true; sfx.engine(false, 0, 0); resetInputs(); }   // don't drive blind while choosing
+  renderMusic(); $('music').hidden = false;
+}
+function closeMusic(){
+  $('music').hidden = true;
+  if (musicPausedGame){ musicPausedGame = false; if (G.mode === 'pause' && $('pause').hidden) G.mode = 'play'; }
+}
+$('bMusic').addEventListener('click', openMusic);
+$('btnMusic').addEventListener('click', openMusic);
+$('stList').addEventListener('click', openMusic);
+$('mClose').addEventListener('click', closeMusic);
+for (const [id, fn] of [['stPrev', () => musicStep(-1)], ['stNext', () => musicStep(1)], ['stPlay', musicToggle], ['mPrev', () => musicStep(-1)], ['mNext', () => musicStep(1)], ['mPlay', musicToggle]])
+  $(id).addEventListener('click', () => { MUSIC.on = 1; store.set('music', 1); fn(); });
+$('mList').addEventListener('click', e => {
+  const del = e.target.closest('.m-del'); if (del){ removeMySong(del.dataset.id); return; }
+  const b = e.target.closest('.m-song'); if (!b) return;
+  MUSIC.on = 1; store.set('music', 1);
+  if (+b.dataset.i === MUSIC.idx) musicToggle(); else musicPlay(+b.dataset.i);
+});
+$('mAdd').addEventListener('click', () => $('mFiles').click());
+$('mFiles').addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; if (f.length) addMySongs(f); });
+{
+  const b = document.createElement('button'); b.className = 'btn ghost'; b.textContent = 'Music';
+  b.addEventListener('click', () => { $('pause').hidden = true; openMusic(); $('mClose').addEventListener('click', () => { if (G.mode === 'pause') $('pause').hidden = false; }, { once: true }); });
+  $('pSettingsSlot').firstElementChild.appendChild(b);
+}
 
 /* ---------- camera ---------- */
 function updateCamLabel(){ $('camLbl').textContent = CAM_NAMES[G.cam]; }
@@ -2774,7 +3149,8 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyH' && G.mode === 'play') honk(true);
   if (e.code === 'KeyC' || e.code === 'KeyV'){ if (G.mode === 'play'){ setCam((G.cam + 1) % 3); toast(CAM_NAMES[G.cam] + ' VIEW'); } }
   if (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3') setCam(+e.code.slice(5) - 1);
-  if (e.code === 'KeyP' || e.code === 'Escape'){ if (G.mode === 'play') pauseGame(); else if (G.mode === 'pause') resumeGame(); }
+  if (e.code === 'KeyP' || e.code === 'Escape'){ if (!$('music').hidden) closeMusic(); else if (G.mode === 'play') pauseGame(); else if (G.mode === 'pause') resumeGame(); }
+  if (e.code === 'KeyN'){ MUSIC.on = 1; store.set('music', 1); musicStep(1); }          // next song
   if (e.code === 'KeyM'){ G.snd = G.snd ? 0 : 1; store.set('snd', G.snd); sfx.init(); sfx.setOn(G.snd); }
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) IN[k] = false; if (e.code === 'KeyH') honk(false); });
@@ -2788,7 +3164,7 @@ const HUD = { spd: $('hSpeed'), gear: $('hGear'), arc: $('gArc'), fuel: $('hFuel
   hearts: $('hHearts'), coins: $('hCoins'), boost: $('boostBar'), warn: $('warn') };
 function updateHUD(){
   const kmh = Math.round(G.v * 3.6), top = topSpeed();
-  if (HL.cabin !== (G.cam === 0)){ HL.cabin = G.cam === 0; document.body.classList.toggle('cabin-view', HL.cabin); }   // lighter buttons over the dashboard
+  if (HL.cabin !== (G.cam === 0)){ HL.cabin = G.cam === 0; document.body.classList.toggle('cabin-view', HL.cabin); $('stereo').hidden = !HL.cabin; }   // lighter buttons + the stereo in the cab
   hset('spd', HUD.spd, String(kmh));
   hset('gear', HUD.gear, G.v < 0.4 ? 'N' : String(Math.min(6, 1 + Math.floor(G.v / top * 6))));
   const arc = Math.round(clamp(kmh / 240, 0, 1) * 100);
@@ -2897,14 +3273,15 @@ if (location.hostname === 'localhost'){
     state(){ return { mode: G.mode, kmh: Math.round(G.v * 3.6), s: Math.round(G.s - G.s0), l: +G.l.toFixed(2), fuel: +G.fuel.toFixed(3), hearts: G.hearts,
       coins: G.coins, traffic: traffic.length, onc: oncoming.length, items: items.length, chunks: chunks.size, night: +G.night.toFixed(2), hours: +G.hours.toFixed(2),
       calls: renderer.info.render.calls, tris: renderer.info.render.triangles, parts: pGeo.drawRange.count }; },
-    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); }
+    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); },
+    music(){ return { playing: MUSIC.playing, song: MUSIC.cur && MUSIC.cur.name, step: MUSIC.step, ctx: MUSIC.ctx && MUSIC.ctx.state, t: MUSIC.ctx && +MUSIC.ctx.currentTime.toFixed(2) }; }
   };
 }
 
 /* =================================================================
    BOOT
    ================================================================= */
-makePools(); makeTemplates(); makeTrafficTemplates(); makeWorksTemplate(); makeItems(); makeCockpit();
+makePools(); makeTemplates(); makeTrafficTemplates(); makeWorksTemplate(); makeItems(); makeCockpit(); loadMySongs();
 buildPlayer();
 applyGfx();
 parkTruck();
