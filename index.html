@@ -122,22 +122,22 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .sign .load{display:inline-flex;align-items:center;gap:.35em}
 .sign .load i{width:.75em;height:.75em;border-radius:50%;flex:none;box-shadow:0 0 0 .12em rgba(255,255,255,.7)}
 .cbtn,.pedal{touch-action:none}              /* driving controls: no scrolling or zoom while held */
-/* pump name board: shows while a pump is ahead, disappears once you pass it */
-#pumpSign{position:absolute;left:50%;top:calc(var(--sat) + 7.9em);transform:translateX(-50%);display:flex;align-items:center;gap:.6em;
-  background:transparent;color:#fff;padding:.3em .6em;width:max-content;max-width:min(92vw,26em);animation:psIn .3s ease-out;pointer-events:none;
-  text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.85),0 0 14px rgba(0,0,0,.55)}      /* see-through: just the words over the road */
-#pumpSign .ps-icon,#pumpSign .ps-logo{filter:drop-shadow(0 1px 3px rgba(0,0,0,.9))}
-#pumpSign .ps-logo{width:2.7em;height:auto;border-radius:.35em;display:none;flex:none}
+/* pump name: a line inside the top HUD panel (in place of the km row), so nothing covers the road ahead */
+#pumpSign{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:.4em;row-gap:.1em;align-items:center;
+  padding:.22em .45em;border-radius:.4em;background:rgba(27,138,75,.32);border:1px solid rgba(61,220,132,.5);animation:psIn .3s ease-out}
+#pumpSign.daman{background:rgba(247,147,30,.16);border-color:rgba(247,147,30,.6)}
+#hud.pump-on #hDistRow{display:none}
+#pumpSign .ps-logo,#pumpSign .ps-icon{grid-row:span 2;flex:none}
+#pumpSign .ps-logo{width:1.9em;height:auto;border-radius:.25em;display:none}
 #pumpSign.daman .ps-logo{display:block}
 #pumpSign.daman .ps-icon{display:none}
-#pumpSign .ps-icon{width:2.1em;height:2.1em;flex:none;color:#ffcf4a}
-#pumpSign .ps-txt{display:grid;gap:.12em;min-width:0}
-#pumpSign small{font:700 .8em/1 'Hind',sans-serif;letter-spacing:.1em;opacity:.92;font-variant-numeric:tabular-nums}
-#pumpSign b{font:700 1.6em/1 'Teko',sans-serif;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pumpSign .ps-icon{width:1.4em;height:1.4em;color:#ffcf4a}
+#pumpSign b{grid-column:2 / 4;font:600 1.15em/1 'Teko',sans-serif;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:.12em}
 #pumpSign.daman b{color:var(--amber-2)}
-#pumpSign span{font-size:.78em;color:#ffe08a}
-#hud.pump-on #toast{top:calc(var(--sat) + 13.4em)}
-@keyframes psIn{from{opacity:0;transform:translate(-50%,-.6em)}}
+#pumpSign small{grid-row:2;grid-column:2;font:700 .78em/1 'Hind',sans-serif;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap}
+#pumpSign span{grid-row:2;grid-column:3;justify-self:end;font-size:.72em;line-height:1.1;color:#ffe08a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes psIn{from{opacity:0;transform:translateY(-.3em)}}
+@media (orientation: portrait){ #pumpSign b{font-size:1em;letter-spacing:0} #pumpSign .ps-logo{width:1.5em} #pumpSign{column-gap:.3em;padding:.2em .35em} }
 @media (prefers-reduced-motion: reduce){ #pumpSign{animation:none} }
 /* in-truck stereo (cabin view): black faceplate, glowing LCD, chunky buttons */
 #stereo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 1.1em);display:flex;align-items:center;gap:.45em;
@@ -248,21 +248,20 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .yt-add input:focus{outline:none;border-color:var(--amber)}
 .yt-add .btn{padding-left:1.1em;padding-right:1.1em}
 .mr-list .mr-empty button{justify-content:center;padding:.7em .5em;color:var(--amber-2);border:1px dashed rgba(247,147,30,.6);background:rgba(247,147,30,.08)}
-/* Daman TV: YouTube's player must stay visible (at least 200 × 200 px) while a song plays; drag it by the side bar */
-#ytDock{position:fixed;left:4px;top:30%;z-index:45;display:flex;border-radius:10px;background:#000;
-  border:2px solid var(--amber);box-shadow:0 6px 18px rgba(0,0,0,.5)}
-.yt-bar{width:28px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0 6px;background:linear-gradient(90deg,#232a6e,var(--navy));border-right:1px solid rgba(247,147,30,.5);border-radius:8px 0 0 8px;touch-action:none;cursor:grab;color:var(--amber-2)}
-.yt-bar:active{cursor:grabbing}
-.yt-bar button{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:rgba(255,75,62,.85);color:#fff}
-.yt-bar button svg{width:12px;height:12px}
-.yt-grip{flex:1;width:10px;min-height:10px;background:radial-gradient(circle,rgba(255,255,255,.55) 1.3px,transparent 1.7px) 0 0/5px 6px}
-.yt-move{width:18px;height:18px;flex:none}
-.yt-tv{font:600 13px/1 'Teko',sans-serif;letter-spacing:.12em;writing-mode:vertical-rl;transform:rotate(180deg)}
+/* Daman TV: YouTube's player must stay visible (at least 200 × 200 px) while a song plays; it sits in a fixed spot clear of the road */
+#ytDock{position:fixed;left:0;top:calc(var(--sat) + 7.9em);z-index:45;display:flex;border-radius:0 10px 10px 0;background:#000;
+  border:2px solid var(--amber);border-left:0;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+@media (orientation: portrait){ #ytDock{top:auto;bottom:calc(var(--sab) + 19.8em)} }   /* upright: low on the left, over the dashboard, never over the road ahead */
+.yt-bar{width:24px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 0 6px;background:linear-gradient(90deg,#232a6e,var(--navy));border-right:1px solid rgba(247,147,30,.5);color:var(--amber-2)}
+.yt-bar button{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;background:rgba(255,75,62,.85);color:#fff}
+.yt-bar button svg{width:11px;height:11px}
+.yt-tv{font:600 12px/1 'Teko',sans-serif;letter-spacing:.14em;writing-mode:vertical-rl;transform:rotate(180deg);margin-top:auto}
 .yt-screen{position:relative;width:200px;height:200px;background:#000;border-radius:0 8px 8px 0;overflow:hidden}
 .yt-hint{display:none;position:absolute;left:50%;top:100%;transform:translateX(-50%);width:max-content;max-width:90vw;margin:8px 0 0;pointer-events:none;
   background:var(--amber);color:#1a1206;padding:4px 10px;border-radius:12px;font:600 13px/1.25 'Hind',sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.45)}
 #ytDock.tap .yt-hint{display:block}
 @media (orientation: landscape){ .yt-hint{left:100%;top:50%;transform:translateY(-50%);margin:0 0 0 8px;width:8.5em;text-align:center} }
+@media (orientation: portrait){ .yt-hint{top:auto;bottom:100%;margin:0 0 8px} }
 .yt-screen iframe,#ytFrame{position:absolute;inset:0;width:100%;height:100%;border:0}
 #hud:not([hidden]) ~ #ytDock{z-index:10}            /* while driving: over the HUD but under the steering/pedal buttons */
 #ytDock.tap{animation:tvTap 1s ease-in-out infinite alternate}
@@ -545,7 +544,12 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     <div class="pnl prog">
       <div class="prog-row"><b id="hLevel">LEVEL 1</b><span id="hTier" class="tier-chip">BEGINNER</span></div>
       <div class="hbar"><i id="hProg" style="transform:scaleX(0)"></i></div>
-      <div class="prog-row"><span id="hDist">0.0 / 1.2 km</span><span id="hClock">12:00</span></div>
+      <div id="hDistRow" class="prog-row"><span id="hDist">0.0 / 1.2 km</span><span id="hClock">12:00</span></div>
+      <div id="pumpSign" class="ps-row" hidden role="status">
+        <img class="ps-logo" data-logo alt="">
+        <svg class="ps-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h9v18H4zM6 5v5h5V5zM14 8h2l3 3v7a2 2 0 01-4 0v-4h-1v-2h3v6h0V11.8L15.6 10H14z"/></svg>
+        <b id="psName"></b><small id="psDist"></small><span id="psTip"></span>
+      </div>
     </div>
     <div class="hud-right">
       <div class="tbtns">
@@ -581,11 +585,6 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
       <ul id="mrList" class="mr-list"></ul>
     </div>
   </aside>
-  <div id="pumpSign" hidden role="status">
-    <img class="ps-logo" data-logo alt="">
-    <svg class="ps-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h9v18H4zM6 5v5h5V5zM14 8h2l3 3v7a2 2 0 01-4 0v-4h-1v-2h3v6h0V11.8L15.6 10H14z"/></svg>
-    <div class="ps-txt"><small id="psDist">FUEL STOP</small><b id="psName"></b><span id="psTip"></span></div>
-  </div>
   <div id="toast"></div>
   <div id="warn" hidden></div>
   <div id="flash"></div>
@@ -642,12 +641,9 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 </div>
 
 <div id="ytDock" hidden aria-label="Daman TV: the song's video">
-  <div class="yt-bar" title="Drag to move">
+  <div class="yt-bar">
     <button id="ytClose" aria-label="Stop the song"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <span class="yt-grip" aria-hidden="true"></span>
-    <svg class="yt-move" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>
-    <b class="yt-tv" aria-hidden="true">MOVE</b>
-    <span class="yt-grip" aria-hidden="true"></span>
+    <b class="yt-tv" aria-hidden="true">DAMAN TV</b>
   </div>
   <div class="yt-screen"><div id="ytFrame"></div></div>
   <p class="yt-hint">Tap ▶ on the video to play</p>
@@ -2593,8 +2589,8 @@ function clockText(h){ const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 
 const CAM_NAMES = ['CABIN', 'BODY', 'DRONE', 'DRIVER'];
 const CAM_NEXT = { 0: 3, 3: 1, 1: 2, 2: 0 };
 function inCab(){ return G.cam === 0 || G.cam === 3; }
-const CAM = { pos: new THREE.Vector3(), look: new THREE.Vector3(), init: false, orbit: 0.6 };
-const _cp = new THREE.Vector3(), _cl = new THREE.Vector3(), _base = new THREE.Vector3(), _clipN = new THREE.Vector3();
+const CAM = { pos: new THREE.Vector3(), look: new THREE.Vector3(), init: false, orbit: 0.6, dx: 0, dy: 0 };   // dx/dy: cab eyes following bends and hills
+const _cp = new THREE.Vector3(), _cl = new THREE.Vector3(), _base = new THREE.Vector3(), _clipN = new THREE.Vector3(), _ahd = new THREE.Vector3();
 function clipOff(){ PL.clip.set(_clipN.set(0, 1, 0), 1e6); CAB.backWall.visible = true; }   // cut-away parked far away: nothing clipped
 function setLens(hfov, near, maxV){
   const a = camera.aspect;
@@ -2635,7 +2631,14 @@ function updateCamera(dt){
       PL.clip.set(_clipN.set(0, 0, -1), -PL.L / 2 + 2.15).applyMatrix4(PL.grp.matrixWorld); CAB.backWall.visible = false;
     }
     _cp.set(ex, ey, -PL.L / 2 + ez).applyMatrix4(PL.grp.matrixWorld);
-    _cl.set(lx, ey - Math.tan(tilt) * (30 + ez), -PL.L / 2 - 30).applyMatrix4(PL.grp.matrixWorld);
+    // ghats and hills: look where the road actually goes. The road 40 m ahead, seen from the cab, sits above or below
+    // (crest / dip) and left or right (bends) of straight ahead; the eyes follow it fully up/down and halfway into bends
+    const look = 30 + ez;
+    roadPoint(G.s + 40, G.l, 0, _ahd); PL.grp.worldToLocal(_ahd);
+    const zA = Math.max(12, -_ahd.z - PL.L / 2);
+    CAM.dx = lerp(CAM.dx || 0, clamp(_ahd.x / zA, -0.6, 0.6) * look * 0.5, damp(2.5, dt));
+    CAM.dy = lerp(CAM.dy || 0, clamp(_ahd.y / zA, -0.35, 0.35) * look, damp(2.5, dt));
+    _cl.set(lx + CAM.dx, ey - Math.tan(tilt) * look + CAM.dy, -PL.L / 2 - 30).applyMatrix4(PL.grp.matrixWorld);
     setLens(hfov + G.v * 0.03, 0.04, maxV);
     CAM.pos.copy(_cp); CAM.look.copy(_cl);
     steerPivot.userData.inner.rotation.z = -G.steer * 2.4;
@@ -2921,43 +2924,18 @@ function ytSyncMute(){                                               // the game
   try { if (G.snd){ YTP.player.unMute(); YTP.player.setVolume(100); } else YTP.player.mute(); } catch (e){}
 }
 
-/* ---------- Daman TV: the draggable video window ---------- */
+/* ---------- Daman TV: the video window, parked where it never covers the road ahead ---------- */
+// fixed spot (CSS): upright phones — low on the left, over the dashboard / truck; sideways — left edge under the speedometer
 const TV = { el: $('ytDock'), tapT: 0 };
-function tvKey(){ return innerWidth >= innerHeight ? 'tvL' : 'tvP'; }
-function tvDefault(){
-  const u = parseFloat(getComputedStyle(document.documentElement).fontSize) || 14;
-  if (innerWidth < innerHeight) return [0, Math.round(13.8 * u)];      // upright: left side, below the HUD and pump board
-  return [0, Math.round(7.9 * u)];                                     // sideways: left edge under the speedometer, clear of the truck
-}
-function tvPlace(){
-  const p = store.get(tvKey(), null), w = TV.el.offsetWidth || 230, h = TV.el.offsetHeight || 204;
-  const [x, y] = p ? [p[0] * innerWidth, p[1] * innerHeight] : tvDefault();
-  TV.el.style.left = clamp(x, 0, Math.max(0, innerWidth - w)) + 'px'; TV.el.style.top = clamp(y, 0, Math.max(0, innerHeight - h)) + 'px';
-}
-function tvShow(on){ if (TV.el.hidden === !on) return; TV.el.hidden = !on; if (on) tvPlace(); else tvWaiting(false); }
+function tvShow(on){ if (TV.el.hidden === !on) return; TV.el.hidden = !on; if (!on) tvWaiting(false); }
 function tvWaiting(on){                                              // phones may block sound until the video itself is tapped once
   clearTimeout(TV.tapT);
   if (on) TV.tapT = setTimeout(() => { if (!TV.el.hidden && MUSIC.playing && YTP.state !== 1 && YTP.state !== 3) TV.el.classList.add('tap'); }, 3500);   // not playing or buffering: sound was blocked
   else TV.el.classList.remove('tap');
 }
-{
-  const bar = TV.el.querySelector('.yt-bar'); let d = null;
-  bar.addEventListener('pointerdown', e => {
-    if (e.target.closest('button')) return;
-    d = { dx: e.clientX - TV.el.offsetLeft, dy: e.clientY - TV.el.offsetTop, id: e.pointerId }; bar.setPointerCapture(e.pointerId); e.preventDefault();
-  });
-  bar.addEventListener('pointermove', e => {
-    if (!d || e.pointerId !== d.id) return;
-    TV.el.style.left = clamp(e.clientX - d.dx, 0, innerWidth - TV.el.offsetWidth) + 'px';
-    TV.el.style.top = clamp(e.clientY - d.dy, 0, innerHeight - TV.el.offsetHeight) + 'px';
-  });
-  const end = () => { if (!d) return; d = null; store.set(tvKey(), [TV.el.offsetLeft / innerWidth, TV.el.offsetTop / innerHeight]); };
-  bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
-  addEventListener('resize', () => { if (!TV.el.hidden) tvPlace(); });
-  $('ytClose').addEventListener('click', () => {                    // YouTube does not allow its songs to play with the video hidden
-    musicPause(); toast('Video band = gaana band (YouTube rule) · bina video ke gaana: 🎵 → Add MP3', 'amber'); toastT = 4.5;
-  });
-}
+$('ytClose').addEventListener('click', () => {                      // YouTube does not allow its songs to play with the video hidden
+  musicPause(); toast('Video band = gaana band (YouTube rule) · bina video ke gaana: 🎵 → Add MP3', 'amber'); toastT = 4.5;
+});
 
 /* ---------- player ---------- */
 function ensureMusicBus(){
@@ -3291,9 +3269,9 @@ function updatePumpSign(pk, dsP, pump){
   if (el.hidden === show){ el.hidden = !show; $('hud').classList.toggle('pump-on', show); }
   if (!show) return;
   if (PS.k !== pk){ PS.k = pk; $('psName').textContent = pump[0]; el.classList.toggle('daman', pumpIdx(pk) === 0); }
-  const d = dsP > 12 ? `FUEL STOP  •  ${Math.max(10, Math.round(dsP / 10) * 10)} m` : 'FUEL STOP  •  HERE';
+  const d = dsP > 12 ? `${Math.max(10, Math.round(dsP / 10) * 10)} m` : 'HERE';
   if (PS.d !== d){ PS.d = d; $('psDist').textContent = d; }
-  const tip = G.pumpUsed === pk ? 'Tank refilled ✓' : G.fuel < 0.97 ? 'Slow down in the left lane to refuel' : 'Tank is full';
+  const tip = G.pumpUsed === pk ? 'Tank refilled ✓' : G.fuel < 0.97 ? 'Left lane, slow down = refuel' : 'Tank full';
   if (PS.tip !== tip){ PS.tip = tip; $('psTip').textContent = tip; }
 }
 function hidePumpSign(){ PS.k = -1; $('pumpSign').hidden = true; $('hud').classList.remove('pump-on'); }
