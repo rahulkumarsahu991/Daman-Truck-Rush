@@ -251,7 +251,10 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 /* Daman TV: YouTube's player must stay visible (at least 200 × 200 px) while a song plays; it sits in a fixed spot clear of the road */
 #ytDock{position:fixed;left:0;top:calc(var(--sat) + 7.9em);z-index:45;display:flex;border-radius:0 10px 10px 0;background:#000;
   border:2px solid var(--amber);border-left:0;box-shadow:0 6px 18px rgba(0,0,0,.5)}
-@media (orientation: portrait){ #ytDock{top:auto;bottom:calc(var(--sab) + 19.8em)} }   /* upright: low on the left, over the dashboard, never over the road ahead */
+@media (orientation: portrait){
+  .cabin-view #ytDock{top:auto;bottom:calc(var(--sab) + 19.8em)}   /* cab views: low on the left, over the dashboard */
+  #ytDock{top:calc(var(--sat) + 8.2em)}                              /* chase / drone views: up in the sky, above the road */
+}
 .yt-bar{width:24px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 0 6px;background:linear-gradient(90deg,#232a6e,var(--navy));border-right:1px solid rgba(247,147,30,.5);color:var(--amber-2)}
 .yt-bar button{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;background:rgba(255,75,62,.85);color:#fff}
 .yt-bar button svg{width:11px;height:11px}
@@ -261,7 +264,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
   background:var(--amber);color:#1a1206;padding:4px 10px;border-radius:12px;font:600 13px/1.25 'Hind',sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.45)}
 #ytDock.tap .yt-hint{display:block}
 @media (orientation: landscape){ .yt-hint{left:100%;top:50%;transform:translateY(-50%);margin:0 0 0 8px;width:8.5em;text-align:center} }
-@media (orientation: portrait){ .yt-hint{top:auto;bottom:100%;margin:0 0 8px} }
+@media (orientation: portrait){ .cabin-view .yt-hint{top:auto;bottom:100%;margin:0 0 8px} }
 .yt-screen iframe,#ytFrame{position:absolute;inset:0;width:100%;height:100%;border:0}
 #hud:not([hidden]) ~ #ytDock{z-index:10}            /* while driving: over the HUD but under the steering/pedal buttons */
 #ytDock.tap{animation:tvTap 1s ease-in-out infinite alternate}
@@ -2162,28 +2165,47 @@ function wheelPoint(side, wheelAngle, out){
   const r = -0.52;                                                // steering wheel tilt (matches makeCockpit)
   return out.set(0.5 + x, 2.2 + y * Math.cos(r) - 0.03 * Math.sin(r), 0.95 + y * Math.sin(r) + 0.03 * Math.cos(r));
 }
+const _gel = new THREE.Vector3(), _ghd = new THREE.Vector3();
 function poseCrew(wheelAngle, steer, dt){
   CREW.t += dt;
+  // a song on the stereo and both of them get into it: nodding and swaying to the beat, the driver drumming the
+  // rim with his right hand, the conductor clapping along and every third bar throwing both arms up, bhangra-style
+  CREW.g = lerp(CREW.g || 0, MUSIC.playing ? 1 : 0, damp(2.5, dt));
+  CREW.beat = (CREW.beat || 0) + dt * Math.PI * 2 * 1.75;          // about 105 beats a minute
+  const g = CREW.g, b = CREW.beat, nod = Math.sin(b), sway = Math.sin(b / 2), bounce = Math.abs(Math.sin(b)) * 0.018 * g;
   const D = CREW.driver;
   if (D){
-    D.body.rotation.z = -steer * 0.05; D.head.rotation.y = -steer * 0.18;
+    D.body.rotation.z = -steer * 0.05 + sway * 0.04 * g; D.body.position.y = bounce;
+    D.head.rotation.y = -steer * 0.18 + sway * 0.1 * g; D.head.rotation.x = nod * 0.12 * g; D.head.position.y = 0.86 + bounce;
     for (let i = 0; i < 2; i++){
       const side = i === 0 ? -1 : 1, a = D.arms[i];
-      _sh.set(side * 0.21, 0.63, -0.04).add(DRIVER_HIP);
+      _sh.set(side * 0.21, 0.63 + bounce, -0.04).add(DRIVER_HIP);
       wheelPoint(side, wheelAngle, _hd);
+      if (i === 1) _hd.y += Math.max(0, Math.sin(b * 2)) * 0.03 * g;   // taps the rim twice a beat
       _el.addVectors(_sh, _hd).multiplyScalar(0.5); _el.x += side * 0.07; _el.y -= 0.09;
       _sh.sub(DRIVER_HIP); _el.sub(DRIVER_HIP); _hd.sub(DRIVER_HIP);   // into the driver's own frame
       limb(a.ua, _sh, _el, 0.052); limb(a.fa, _el, _hd, 0.042); a.hand.position.copy(_hd);
     }
   }
   const C = CREW.conductor;
-  if (C){                                                          // relaxed, glancing at the road and out of the window
-    C.head.rotation.y = Math.sin(CREW.t * 0.45) * 0.45 + Math.sin(CREW.t * 1.3) * 0.08;
-    C.head.rotation.x = Math.sin(CREW.t * 0.7) * 0.05;
+  if (C){                                                          // no song: relaxed, glancing at the road and out of the window
+    const idle = 1 - g, lift = bounce * 1.3;
+    C.head.rotation.y = (Math.sin(CREW.t * 0.45) * 0.45 + Math.sin(CREW.t * 1.3) * 0.08) * idle + sway * 0.18 * g;
+    C.head.rotation.x = Math.sin(CREW.t * 0.7) * 0.05 * idle + nod * 0.14 * g;
+    C.head.rotation.z = sway * 0.12 * g; C.head.position.y = 0.86 + lift;
+    C.body.rotation.z = sway * 0.06 * g; C.body.position.y = lift;
+    CREW.bh = lerp(CREW.bh || 0, g > 0.5 && Math.floor(b / (Math.PI * 8)) % 3 === 2 ? 1 : 0, damp(7, dt));
+    const clap = 0.5 - 0.5 * Math.cos(b);                           // 0 = palms together, once a beat
     for (let i = 0; i < 2; i++){
       const side = i === 0 ? -1 : 1, a = C.arms[i];
-      _sh.set(side * 0.21, 0.63, -0.02); _el.set(side * 0.27, 0.38, -0.07);
+      _sh.set(side * 0.21, 0.63 + lift, -0.02); _el.set(side * 0.27, 0.38, -0.07);
       _hd.set(side * (i === 0 ? 0.26 : 0.14), 0.2 + (i === 0 ? 0.12 : 0), -0.3 + (i === 0 ? 0.1 : 0));
+      if (g > 0.01){                                                 // clapping up by his right shoulder (seen from behind) ↔ both arms up
+        _gel.set(i === 0 ? -0.04 : 0.36, 0.5, i === 0 ? -0.26 : -0.1).lerp(_ghd.set(side * 0.34, 0.78, -0.02), CREW.bh);
+        _el.lerp(_gel, g);
+        _gel.set(0.2 + side * (0.02 + 0.08 * clap), 0.72 + 0.03 * nod, -0.2).lerp(_ghd.set(side * (0.3 + 0.04 * sway * side), 1.02 + 0.03 * nod, -0.06), CREW.bh);
+        _hd.lerp(_gel, g);
+      }
       limb(a.ua, _sh, _el, 0.052); limb(a.fa, _el, _hd, 0.042); a.hand.position.copy(_hd);
     }
   }
@@ -2681,6 +2703,14 @@ function updateCamera(dt){
     setLens(tall ? 56 : 64, 0.5, 88); k = 4;
   }
   if (!CAM.init){ CAM.pos.copy(_cp); CAM.look.copy(_cl); CAM.init = true; }
+  // Daman TV sits on the left edge. In the chase and drone views on a wide screen the picture slides right so the road
+  // is centred in the free space beside it; on an upright phone the TV sits up in the sky and the drone picture slides
+  // down under it. (In the cab views the TV sits over the dashboard and nothing needs to move.)
+  const tvOn = !cabin && !TV.el.hidden;
+  const tx = tvOn && !tall ? -0.5 * TV.el.offsetWidth / innerWidth : 0, ty = tvOn && tall ? (G.cam === 2 ? -0.12 : -0.06) : 0;
+  const nx = Math.abs(viewShift[0] - tx) < 1e-3 ? tx : lerp(viewShift[0], tx, damp(5, dt));
+  const ny = Math.abs(viewShift[1] - ty) < 1e-3 ? ty : lerp(viewShift[1], ty, damp(5, dt));
+  if (nx !== viewShift[0] || ny !== viewShift[1]){ viewShift = [nx, ny]; applyViewShift(); }
   if (!cabin){ CAM.pos.lerp(_cp, damp(k, dt)); CAM.look.lerp(_cl, damp(k * 1.5, dt)); }
   camera.position.copy(CAM.pos);
   if (G.shake > 0){ const s = G.shake * (cabin ? 0.06 : 0.25); camera.position.x += rand(-s, s); camera.position.y += rand(-s, s); G.shake = Math.max(0, G.shake - dt * 2.2); }
@@ -2769,7 +2799,7 @@ function endRun(ok, reason){
   const dist = G.s - G.s0;
   let stars = 0;
   if (ok){
-    stars = Math.max(1, G.hearts);
+    stars = clamp(G.hearts, 1, 3);
     G.stars[G.level] = Math.max(G.stars[G.level] || 0, stars);
     G.unlocked = Math.max(G.unlocked, Math.min(MAX_LV, G.level + 1));
     store.set('stars', G.stars); store.set('unlocked', G.unlocked);
@@ -3228,7 +3258,7 @@ function renderLevels(){
   for (let t = 0; t < 6; t++){
     h += `<div class="tier"><h4>${TIERS[t][0]} <small>${TIERS[t][1]}</small></h4><div class="lv-row">`;
     for (let n = t * 5 + 1; n <= t * 5 + 5; n++){
-      const lock = n > G.unlocked, st = G.stars[n] || 0;
+      const lock = n > G.unlocked, st = clamp(G.stars[n] || 0, 0, 3) | 0;
       h += `<button class="ms${lock ? ' lock' : ''}${n === G.unlocked ? ' cur' : ''}" data-n="${n}"${lock ? ' disabled' : ''} aria-label="Level ${n}${lock ? ', locked' : ', ' + st + ' stars'}"><b>${n}</b><i>${lock ? 'LOCKED' : '★'.repeat(st) + '☆'.repeat(3 - st)}</i></button>`;
     }
     h += '</div></div>';
