@@ -966,6 +966,30 @@ TEX.frame = canvasTex(256, 128, (g, w, h) => {                 // black rubber f
   g.clearRect(0, 0, w, h); g.fillStyle = '#121316';
   g.fillRect(0, 0, w, 10); g.fillRect(0, h - 10, w, 10); g.fillRect(0, 0, 10, h); g.fillRect(w - 10, 0, 10, h); g.fillRect(w / 2 - 5, 0, 10, h);
 });
+TEX.wheelBlack = canvasTex(512, 256, (g) => {                  // clean black tyres on dark steel rims (16-wheeler, tanker)
+  const cx = 128, cy = 128;
+  g.fillStyle = '#141517'; g.fillRect(0, 0, 512, 256);
+  g.fillStyle = '#1a1b1e'; g.beginPath(); g.arc(cx, cy, 126, 0, 7); g.fill();
+  g.strokeStyle = '#26272b'; g.lineWidth = 4; for (let rr = 100; rr < 124; rr += 8){ g.beginPath(); g.arc(cx, cy, rr, 0, 7); g.stroke(); }
+  g.fillStyle = '#3a3d42'; g.beginPath(); g.arc(cx, cy, 78, 0, 7); g.fill();
+  g.fillStyle = '#23252a'; g.beginPath(); g.arc(cx, cy, 66, 0, 7); g.fill();
+  g.fillStyle = '#101113';
+  for (let i = 0; i < 8; i++){ const a = i / 8 * Math.PI * 2; g.beginPath(); g.ellipse(cx + Math.cos(a) * 54, cy + Math.sin(a) * 54, 9, 6, a, 0, 7); g.fill(); }
+  g.fillStyle = '#55595f'; g.beginPath(); g.arc(cx, cy, 26, 0, 7); g.fill();
+  g.fillStyle = '#1d1e21'; for (let i = 0; i < 8; i++){ const a = i / 8 * Math.PI * 2 + 0.2; g.beginPath(); g.arc(cx + Math.cos(a) * 34, cy + Math.sin(a) * 34, 4.5, 0, 7); g.fill(); }
+  g.fillStyle = '#b8912e'; g.fillRect(cx - 4, cy - 70, 8, 12);
+  g.fillStyle = '#1c1d20'; g.fillRect(256, 0, 256, 256);
+  g.fillStyle = '#0c0d0f';
+  for (let y = -16; y < 256; y += 22){ g.beginPath(); g.moveTo(262, y); g.lineTo(384, y + 14); g.lineTo(506, y); g.lineTo(506, y + 9); g.lineTo(384, y + 23); g.lineTo(262, y + 9); g.fill(); }
+});
+TEX.visor = canvasTex(512, 64, (g, w, h) => {                   // red DAMAN lettering above a modern windscreen
+  g.clearRect(0, 0, w, h); g.fillStyle = '#c8211d'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  fitText(g, 'DAMAN', w - 40, 56, 700, "Georgia,'Times New Roman',serif"); g.fillText('DAMAN', w / 2, h / 2 + 3);
+});
+TEX.chev = canvasTex(256, 32, (g, w, h) => {                   // yellow / black chevrons on a rear guard
+  g.fillStyle = '#f2c230'; g.fillRect(0, 0, w, h); g.fillStyle = '#16171a';
+  for (let x = -h; x < w + h; x += 32){ g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 16, 0); g.lineTo(x + 16 + h, h); g.lineTo(x + h, h); g.fill(); }
+});
 TEX.mesh = canvasTex(64, 64, (g, w, h) => {                      // wire-mesh guard on the sleeper window
   g.clearRect(0, 0, w, h); g.strokeStyle = "#1c1d20"; g.lineWidth = 3;
   for (let i = -w; i < w * 2; i += 10){ g.beginPath(); g.moveTo(i, 0); g.lineTo(i + h, h); g.stroke(); g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.stroke(); }
@@ -1057,6 +1081,98 @@ function damanSideTex(band, text){
     g.fillStyle = '#f4f4f0'; g.fillRect(bx - 46, by - 42, 92, 84); drawLogo(g, bx, by, 74);
   }));
 }
+// ---- Daman fleet liveries (16-wheeler open body, tipper trailer, fuel tanker), drawn from the owner's photos.
+// Texture left = rear of the vehicle, as for damanSideTex. Text 'Daman' gets the full company livery (AIP badge,
+// "Group", logos); any other word (traffic trucks) gets just that word.
+function scriptWord(g, txt, x, y, size, fill, halo, outline){
+  g.font = `italic 700 ${size | 0}px Georgia,'Times New Roman',serif`; g.lineJoin = 'round';
+  if (outline){ g.lineWidth = size * 0.2; g.strokeStyle = outline; g.strokeText(txt, x, y); }
+  g.lineWidth = size * 0.11; g.strokeStyle = halo; g.strokeText(txt, x, y);
+  g.fillStyle = fill; g.fillText(txt, x, y);
+}
+function blockWord(g, txt, x, y, size, fill, halo, outline){
+  g.font = `italic 800 ${size | 0}px ${FONT_B}`; g.lineJoin = 'round';
+  if (outline){ g.lineWidth = size * 0.2; g.strokeStyle = outline; g.strokeText(txt, x, y); }
+  g.lineWidth = size * 0.1; g.strokeStyle = halo; g.strokeText(txt, x, y);
+  g.fillStyle = fill; g.fillText(txt, x, y);
+}
+function aipBadge(g, x, y, r){                                     // the round blue "AIP" badge from the photos
+  g.fillStyle = '#f4f4f0'; g.beginPath(); g.arc(x, y, r * 1.12, 0, 7); g.fill();
+  g.fillStyle = '#1f6fd0'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  g.strokeStyle = '#d8342a'; g.lineWidth = r * 0.12; g.beginPath(); g.arc(x, y, r * 0.8, 0, 7); g.stroke();
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${r * 0.72 | 0}px ${FONT_B}`; g.fillText('AIP', x, y + r * 0.04);
+}
+function logoBoard(g, x, y, s){ g.fillStyle = '#f4f4f0'; g.fillRect(x - s * 0.62, y - s * 0.56, s * 1.24, s * 1.12); drawLogo(g, x, y, s); }
+const livCache = {};
+function liveryTex(style, text, base){
+  const key = style + '|' + text + '|' + base, full = text === 'Daman';
+  if (livCache[key]) return livCache[key];
+  const r = rng(key.length * 104729 + style.charCodeAt(0));
+  if (style === '16') return livCache[key] = canvasTex(1792, 288, (g, w, h) => {
+    // glossy black ribbed steel, sky-blue band over a yellow pinstripe, wide-spaced light-blue script letters
+    const panels = 18, pw = w / panels, bandY = h * 0.77, bandH = h * 0.13;
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#2a2d33'); gr.addColorStop(0.4, '#1a1c21'); gr.addColorStop(1, '#101114');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < panels; i++){ const hl = g.createLinearGradient(i * pw, 0, (i + 1) * pw, 0); hl.addColorStop(0, 'rgba(255,255,255,0)'); hl.addColorStop(0.3, 'rgba(255,255,255,.07)'); hl.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = hl; g.fillRect(i * pw, 12, pw, bandY - 12); }
+    for (let i = 1; i < panels; i++){ g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(i * pw - 2, 0, 4, bandY); }
+    g.fillStyle = '#0c0d10'; g.fillRect(0, 0, w, 12);
+    g.fillStyle = base; g.fillRect(0, bandY, w, bandH);
+    g.fillStyle = '#f2c230'; g.fillRect(0, bandY + bandH, w, h * 0.04);
+    g.fillStyle = '#0e0f12'; g.fillRect(0, bandY + bandH + h * 0.04, w, h);
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = 'rgba(20,30,60,.9)'; g.font = `600 ${h * 0.07 | 0}px ${FONT_B}`;
+    for (let i = 2; i < panels - 1; i += 3) g.fillText('DAMAN MANDEEP ROADLINE', i * pw, bandY + bandH / 2 + 1);
+    const letters = [...text], p0 = Math.round(panels * 0.52 - letters.length);
+    letters.forEach((ch, k) => scriptWord(g, ch, (p0 + k * 2 + 0.5) * pw, bandY - h * 0.25, h * 0.46, '#8fd6f7', '#f4f4f0', '#0d2442'));
+    if (full){ aipBadge(g, (p0 - 1.3) * pw, bandY - h * 0.25, h * 0.14); logoBoard(g, 2.5 * pw, h * 0.45, h * 0.28); logoBoard(g, (panels - 2.5) * pw, h * 0.45, h * 0.28); }
+  });
+  if (style === 'tip') return livCache[key] = canvasTex(1536, 330, (g, w, h) => {
+    // navy tipper box in four big panels, an orange stripe, "Daman (AIP) Group" in light blue with white halo
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#2b3448'); gr.addColorStop(0.5, base); gr.addColorStop(1, '#141925');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 260; i++){ g.fillStyle = `rgba(${150 + r() * 50 | 0},${110 + r() * 30 | 0},${70 + r() * 20 | 0},${(0.05 + r() * 0.12).toFixed(2)})`; g.fillRect(r() * w, h * 0.55 + r() * h * 0.45, 2 + r() * 12, 1 + r() * 5); }
+    const sy = h * 0.6;
+    g.fillStyle = '#e39b2d'; g.fillRect(0, sy, w, h * 0.045);
+    g.fillStyle = 'rgba(255,255,255,.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `600 ${h * 0.06 | 0}px ${FONT_B}`;
+    for (const x of [0.3, 0.55, 0.8]) g.fillText('DAMAN MANDEEP ROADLINE', x * w, sy + h * 0.1);
+    if (full){
+      scriptWord(g, 'Dam', w * 0.375, h * 0.36, h * 0.4, '#7ec9f0', '#f4f4f0', '#0b1c33');
+      scriptWord(g, 'an', w * 0.56, h * 0.36, h * 0.4, '#7ec9f0', '#f4f4f0', '#0b1c33');
+      aipBadge(g, w * 0.665, h * 0.34, h * 0.14);
+      blockWord(g, 'Group', w * 0.875, h * 0.36, h * 0.27, '#7ec9f0', '#f4f4f0', '#0b1c33');
+      g.fillStyle = '#f4f4f0'; g.fillRect(w * 0.035, h * 0.18, w * 0.05, h * 0.3);           // hazard label, rear end
+      g.fillStyle = '#d8342a'; g.save(); g.translate(w * 0.06, h * 0.3); g.rotate(Math.PI / 4); g.fillRect(-h * 0.05, -h * 0.05, h * 0.1, h * 0.1); g.restore();
+    } else scriptWord(g, text, w * 0.55, h * 0.42, h * 0.32, '#f2c230', '#f4f4f0', '#0b1c33');
+  });
+  // fuel tanker, drawn for a band wrapped round each side of the tank (bottom of the texture = low on the tank)
+  return livCache[key] = canvasTex(2048, 420, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#eef0f2'); gr.addColorStop(0.45, '#c9ced3'); gr.addColorStop(1, '#9ca3aa');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 140; i++){ g.fillStyle = `rgba(255,255,255,${(0.04 + r() * 0.08).toFixed(2)})`; g.fillRect(r() * w, 0, 1 + r() * 3, h); }
+    for (let i = 0; i < 90; i++){ g.fillStyle = `rgba(90,80,70,${(0.03 + r() * 0.07).toFixed(2)})`; g.fillRect(r() * w, h * 0.7 + r() * h * 0.3, 3 + r() * 16, 1 + r() * 4); }
+    g.fillStyle = full ? '#3f8f45' : base; g.fillRect(0, h * 0.14, w, h * 0.06);          // green band high on the tank
+    g.fillStyle = '#d9542c'; g.fillRect(0, h * 0.7, w, h * 0.065);                          // red-orange stripe with small lettering
+    g.fillStyle = '#f2c230'; g.fillRect(0, h * 0.765, w, h * 0.012);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${h * 0.045 | 0}px ${FONT_B}`;
+    for (const x of [0.28, 0.62]) g.fillText('DAMAN  MANDEEP  ROAD  LINES', x * w, h * 0.733);
+    if (full){
+      g.fillStyle = '#1f5fa8';
+      for (let k = 0; k < 3; k++){ const x = w * (0.3 + k * 0.035); g.beginPath(); g.moveTo(x, h * 0.2); g.lineTo(x + w * 0.02, h * 0.2); g.lineTo(x + w * 0.005, h * 0.26); g.lineTo(x - w * 0.015, h * 0.26); g.fill(); }
+      scriptWord(g, 'Daman', w * 0.24, h * 0.45, h * 0.36, '#2a6fd6', '#f4f4f0', '#0b2346');
+      aipBadge(g, w * 0.415, h * 0.43, h * 0.13);
+      blockWord(g, 'Group', w * 0.57, h * 0.45, h * 0.28, '#1f5fd0', '#f4f4f0', '#0b2346');
+      logoBoard(g, w * 0.9, h * 0.44, h * 0.22);
+      g.fillStyle = '#f4f4f0'; g.fillRect(w * 0.03, h * 0.3, w * 0.035, h * 0.26);         // hazard plates at the rear end
+      g.fillStyle = '#e8642c'; g.save(); g.translate(w * 0.0475, h * 0.43); g.rotate(Math.PI / 4); g.fillRect(-h * 0.045, -h * 0.045, h * 0.09, h * 0.09); g.restore();
+    } else blockWord(g, text.toUpperCase(), w * 0.45, h * 0.45, h * 0.24, '#c62828', '#f4f4f0', '#3a0d0d');
+  });
+}
+const livMatCache = {};
+function liveryMat(k){
+  const [style, text, base] = k.split('|');
+  return livMatCache[k] || (livMatCache[k] = stdMat(style === 'tank'
+    ? { map: liveryTex(style, text, base), roughness: 0.3, metalness: 0.55, envMapIntensity: 0.8, polygonOffset: true, polygonOffsetFactor: -2 }
+    : { map: liveryTex(style, text, base), roughness: 0.7, metalness: 0.05, polygonOffset: true, polygonOffsetFactor: -2 }, style === 'tank'));
+}
 const dsideMatCache = {};
 function dsideMat(k){
   const [band, text] = k.split('|');
@@ -1089,6 +1205,10 @@ const MAT = {
   glass: stdMat({ color: 0x0b141d, roughness: 0.05, metalness: 0.7, envMapIntensity: 1.6 }, true),
   wheel: stdMat({ map: TEX.wheel, roughness: 0.8, metalness: 0.1 }),
   wheelMud: stdMat({ map: TEX.wheelMud, roughness: 0.95, metalness: 0.05 }),
+  wheelBlack: stdMat({ map: TEX.wheelBlack, roughness: 0.85, metalness: 0.1 }),
+  sack: stdMat({ color: 0x8a6a4a, roughness: 0.95, flatShading: true }),
+  visor: stdMat({ map: TEX.visor, transparent: true, alphaTest: 0.4, roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -3 }),
+  chev: stdMat({ map: TEX.chev, roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -2 }),
   head: stdMat({ color: 0xffffff, emissive: 0xfff1c4, emissiveIntensity: 0.4 }),
   tail: stdMat({ color: 0x5a0a06, emissive: 0xff2a14, emissiveIntensity: 0.5 }),
   amber: stdMat({ color: 0x7a4a00, emissive: 0xffa000, emissiveIntensity: 0.5 }),
@@ -1126,6 +1246,7 @@ function getMat(key){
   if (key.startsWith('cargo:')) return cargoMat(key.slice(6));
   if (key.startsWith('art:')) return artMat(key.slice(4));
   if (key.startsWith('dside:')) return dsideMat(key.slice(6));
+  if (key.startsWith('liv:')) return liveryMat(key.slice(4));
   return MAT.dark;
 }
 const GLOW_MAT = {
@@ -1823,9 +1944,9 @@ function updateWeather(dt, speed, tan, inCab){
    ================================================================= */
 const TRUCKS = {
   '14':   { name: '14 Wheeler', sub: 'The real Daman fleet truck • open steel body • all-rounder', wheels: 14, L: 12.0, top: 138, acc: 4.1, handling: 1.0, cab: '#e0662a', body: '#6fb8e0' },
-  '16':   { name: '16 Wheeler', sub: 'Tipper loaded with sand • heavy and strong',         wheels: 16, L: 10.8, top: 128, acc: 3.6, handling: 0.9, cab: '#f2b705', body: '#e07b1a' },
-  '18':   { name: '18 Wheeler', sub: 'Open-body trailer with steel coils • fastest',       wheels: 18, L: 16.5, top: 155, acc: 3.5, handling: 0.8, cab: '#1f5fa8', body: '#2c3e50' },
-  'tank': { name: 'Diesel Tanker', sub: 'Fuel tanker • quick and nimble',                  wheels: 12, L: 11.2, top: 146, acc: 4.4, handling: 0.95, cab: '#e9edf1', body: '#c62828' },
+  '16':   { name: '16 Wheeler', sub: 'Daman fleet • long black open body • heavy and strong', wheels: 16, L: 12.5, top: 128, acc: 3.6, handling: 0.9, cab: '#c9573c', body: '#5fb7e6' },
+  '18':   { name: '18 Wheeler', sub: 'Daman AIP Group tipper trailer • fastest',            wheels: 18, L: 12.3, top: 155, acc: 3.5, handling: 0.8, cab: '#f2f2ee', body: '#2c3a58' },
+  'tank': { name: 'Diesel Tanker', sub: 'Daman AIP Group fuel tanker • quick and nimble',     wheels: 16, L: 12.5, top: 146, acc: 4.4, handling: 0.95, cab: '#f2f2ee', body: '#3f8f45' },
 };
 const TRUCK_IDS = ['14', '16', '18', 'tank'];
 const PAINTS = ['#c62828', '#e07b1a', '#f2b705', '#1b8a4b', '#1f5fa8', '#6a2c91', '#e9edf1', '#2b2f36'];
@@ -1922,7 +2043,7 @@ function roundedShell(w, d, h, r){                                  // box with 
   const g = new THREE.ExtrudeGeometry(s, { depth: h, bevelEnabled: false, curveSegments: 5 }).rotateX(-Math.PI / 2);
   return (_shellCache[k] = g).clone();
 }
-function addCabDaman(B, zf, W, accent, rF, tankZ){
+function addCabDaman(B, zf, W, accent, rF, tankZ, steer){
   const A = 'paint:' + accent, C = 'paint:#ebe6d8', CW = W - 0.05, rc = 0.14, zc = zf + 1.15, zb = zf + 2.25;
   B.add(C, roundedShell(CW, 2.2, 2.0, rc).translate(0, 1.15, zc));           // one cream shell, rounded upright corners
   // accent band round the windows (kept off the rounded corners)
@@ -1982,12 +2103,66 @@ function addCabDaman(B, zf, W, accent, rF, tankZ){
   for (const y of [1.3, 1.7, 2.1, 2.5, 2.9, 3.3]) B.box('chrome', 0.3, 0.03, 0.03, W / 2 - 0.3, y, zb + 0.12);   // ladder behind the cab
   B.box('chrome', 0.03, 2.3, 0.03, W / 2 - 0.15, 2.3, zb + 0.12); B.box('chrome', 0.03, 2.3, 0.03, W / 2 - 0.45, 2.3, zb + 0.12);
   B.box('chassis', 0.55, 0.6, 1.1, W / 2 - 0.3, 0.85, zf + (tankZ || 2.95));
-  for (const z of [1.3, 3.66]){
+  for (const z of (steer || [1.3, 3.66])){
     B.box('dark', 0.5, 0.08, 1.2, W / 2 - 0.25, rF * 2 + 0.1, zf + z); B.box('dark', 0.5, 0.08, 1.2, -W / 2 + 0.25, rF * 2 + 0.1, zf + z);
     B.box('dark', 0.45, 0.45, 0.03, W / 2 - 0.25, 0.5, zf + z + 0.6); B.box('dark', 0.45, 0.45, 0.03, -W / 2 + 0.25, 0.5, zf + z + 0.6);   // mudflaps
   }
   B.glow('white', -0.85, 1.5, zf - 0.15, 1.7); B.glow('white', 0.85, 1.5, zf - 0.15, 1.7);
   return { exhaust: new THREE.Vector3(-W / 2 + 0.28, 3.85, zf + 2.35) };
+}
+// modern flat-fronted cab (the white cabs on the owner's tipper and tanker photos): rounded white shell, a big
+// windscreen with DAMAN in red above it, a black grille carrying the Daman badge, swept headlamps, a black bumper,
+// door steps, a side stripe and big mirrors. o.rack adds the tanker's roof rack; o.grey paints the lower sides grey.
+// The shell fills the same space as the older cab, so the cabin interior and the cameras fit it unchanged
+function addCabModern(B, zf, W, color, rF, o){
+  o = o || {};
+  const P = 'paint:' + color, CW = W - 0.05, rc = 0.22, zc = zf + 1.17, zb = zf + 2.3;
+  B.add(P, roundedShell(CW, 2.25, 2.28, rc).translate(0, 1.08, zc));
+  // front: windscreen + frame, DAMAN above it, grille with the badge, headlamps, indicators, bumper, plate
+  B.box('glass', W - 0.3, 1.02, 0.06, 0, 2.66, zf + 0.03);
+  B.decal('frame', W - 0.26, 1.06, 0, 2.66, zf - 0.004, 'front');
+  B.decal('visor', 1.3, 0.16, 0, 3.24, zf + 0.04, 'front');
+  B.box('dark', 1.7, 0.62, 0.06, 0, 1.62, zf + 0.02);
+  for (let i = 0; i < 4; i++) B.box('steel', 1.62, 0.05, 0.04, 0, 1.4 + i * 0.14, zf - 0.02);
+  B.decal('logo', 0.34, 0.3, 0, 1.64, zf - 0.045, 'front');
+  for (const sx of [1, -1]){
+    B.box('head', 0.42, 0.18, 0.08, sx * 0.9, 1.46, zf + 0.01, 0, sx * -0.25);
+    B.box('amber', 0.2, 0.08, 0.06, sx * 1.02, 1.32, zf + 0.04);
+    B.box('amber', 0.06, 0.18, 0.18, sx * (CW / 2 + 0.02), 1.6, zf + 0.25);
+  }
+  B.box('dark', W + 0.06, 0.36, 0.36, 0, 0.96, zf + 0.1);
+  B.decal('plate', 0.62, 0.16, 0, 0.96, zf - 0.085, 'front');
+  for (const sx of [1, -1]) B.box('head', 0.14, 0.08, 0.04, sx * 0.9, 0.9, zf - 0.09);                        // fog lamps
+  // sides: door + quarter windows, stripe, optional grey lower half, steps, handle, mirrors
+  for (const sx of [1, -1]){
+    const x = sx * (CW / 2 + 0.007), face = sx > 0 ? 'right' : 'left';
+    B.box('glass', 0.06, 0.62, 0.95, sx * (W / 2 - 0.02), 2.62, zf + 0.8);
+    B.box('glass', 0.06, 0.45, 0.42, sx * (W / 2 - 0.02), 2.68, zf + 1.78);
+    B.decal('paint:#f2a31b', 2.25 - 2 * rc, 0.06, x, 1.95, zc, face);
+    if (o.grey) B.decal('paint:#9aa0a6', 2.25 - 2 * rc, 0.55, x, 1.4, zc, face);
+    B.decal('dark', 0.02, 1.2, x, 1.85, zf + 0.25, face); B.decal('dark', 0.02, 1.2, x, 1.85, zf + 1.4, face);
+    B.decal('logo', 0.36, 0.32, x, 2.2, zf + 0.72, face);
+    B.box('dark', 0.03, 0.04, 0.16, sx * (CW / 2 + 0.01), 2.05, zf + 1.25);
+    for (const y of [0.62, 0.95]) B.box('dark', 0.34, 0.06, 0.4, sx * (W / 2 - 0.12), y, zf + 0.85);
+    B.box('dark', 0.36, 0.06, 0.06, sx * (W / 2 + 0.16), 2.7, zf + 0.3);
+    B.box('dark', 0.1, 0.62, 0.3, sx * (W / 2 + 0.36), 2.45, zf + 0.3);
+    B.box('dark', 0.08, 0.2, 0.18, sx * (W / 2 + 0.32), 2.0, zf + 0.3);
+  }
+  for (let i = -2; i <= 2; i++) B.box('amber', 0.14, 0.07, 0.05, i * 0.3, 3.3, zf + 0.12);                     // roof marker lights
+  if (o.rack){                                                                                                  // tanker: roof rack + rails
+    B.box('paint:#e0662a', W - 0.2, 0.08, 1.9, 0, 3.42, zf + 1.25);
+    B.box('paint:#efeee8', W - 0.3, 0.22, 1.7, 0, 3.55, zf + 1.25);
+    for (const sx of [1, -1]){ B.box('chrome', 0.035, 0.035, 1.9, sx * (W / 2 - 0.12), 3.75, zf + 1.25); for (const z of [0.4, 1.25, 2.1]) B.box('chrome', 0.03, 0.3, 0.03, sx * (W / 2 - 0.12), 3.6, zf + z); }
+  }
+  // behind the cab: exhaust stack (smoke comes out here), silver diesel tank, mudguards over the steering axles
+  B.cyl('chrome', 0.09, 0.09, 1.9, 10, -W / 2 + 0.28, 2.85, zb + 0.12);
+  B.cyl('chrome', 0.3, 0.3, 1.0, 16, W / 2 - 0.32, 0.85, zf + (o.tankZ || 3.0), Math.PI / 2);
+  for (const z of (o.steer || [1.4])){
+    B.box('dark', 0.55, 0.08, 1.25, W / 2 - 0.25, rF * 2 + 0.12, zf + z); B.box('dark', 0.55, 0.08, 1.25, -W / 2 + 0.25, rF * 2 + 0.12, zf + z);
+    B.box('dark', 0.45, 0.45, 0.03, W / 2 - 0.25, 0.5, zf + z + 0.62); B.box('dark', 0.45, 0.45, 0.03, -W / 2 + 0.25, 0.5, zf + z + 0.62);
+  }
+  B.glow('white', -0.9, 1.46, zf - 0.15, 1.7); B.glow('white', 0.9, 1.46, zf - 0.15, 1.7);
+  return { exhaust: new THREE.Vector3(-W / 2 + 0.28, 3.85, zb + 0.12) };
 }
 function addRear(B, z, W, y){
   B.box('chassis', W, 0.3, 0.2, 0, y, z);
@@ -2051,64 +2226,95 @@ function buildTruck(id, cabHex, bodyHex, cargo, sideText){
     B.axle(zf + 1.43, r, W, false, true); B.axle(zf + 3.66, r, W, false, true);
     B.axle(zf + 7.86, r, W, true); B.axle(zf + 9.29, r, W, true); B.axle(zf + 10.9, r, W, false);
   } else if (id === '16'){
-    info = addCab(B, zf, W, cabHex, rF, 3.9);
+    // Daman 16-wheeler from the owner's photo (≈53 px a metre): older cab, glossy black ribbed open body, sky-blue band,
+    // big light-blue letters, twin steering axles and three dual axles at the back
+    const r = 0.56;
+    B.wheelMat = MAT.wheelBlack;
+    info = addCabDaman(B, zf, W, cabHex, r, 4.8, [1.32, 3.4]);
     B.box('chassis', 1.0, 0.32, L - 1.0, 0, 1.0, 0.3);
-    const b0 = zf + 2.5, b1 = zr - 0.2, bl = b1 - b0, bc = (b0 + b1) / 2;
-    B.box('paint:' + bodyHex, W, 0.2, bl, 0, 1.45, bc);
-    B.box('paint:' + bodyHex, 0.1, 1.55, bl, W / 2 - 0.05, 2.3, bc); B.box('paint:' + bodyHex, 0.1, 1.55, bl, -W / 2 + 0.05, 2.3, bc);
-    B.box('paint:' + bodyHex, W, 1.95, 0.12, 0, 2.5, b0); B.box('paint:' + bodyHex, W, 1.55, 0.12, 0, 2.3, b1);
-    for (let z = b0 + 0.8; z < b1 - 0.3; z += 1.1){ B.box('chassis', 0.1, 1.5, 0.14, W / 2 + 0.04, 2.3, z); B.box('chassis', 0.1, 1.5, 0.14, -W / 2 - 0.04, 2.3, z); }
-    B.box('paint:' + bodyHex, W, 0.1, 1.5, 0, 3.52, b0 - 0.65);                 // canopy over the cab
-    B.cyl('chrome', 0.12, 0.12, 1.3, 10, 0, 1.9, b0 + 0.2, 0.7);                // tipping ram
-    if (cargo && cargo.bags) bagStack(B, W - 0.3, b0 + 0.1, b1 - 0.1, 1.55, 5);
-    else B.add(cargo ? 'cargo:' + cargo.hex : 'sand', heapGeo(1.12, 0.62, bl / 2 - 0.2, cargo ? 0.2 : 0.1).translate(0, 3.0, bc));
-    B.decal('hop', 2.1, 1.05, 0, 2.25, b1 + 0.07, 'rear');
-    addRear(B, zr, W, 0.95); mudflaps(B, zr - 0.2, W);
-    B.axle(zf + 1.3, rF, W, false, true); B.axle(zf + 2.75, rF, W, false, true);
-    B.axle(zr - 3.9, rR, W, true); B.axle(zr - 2.65, rR, W, true); B.axle(zr - 1.4, rR, W, true);
+    const b0 = zf + 2.6, b1 = zr - 0.05, bl = b1 - b0, bc = (b0 + b1) / 2, S = 'paint:#1b1d21', R2 = 'paint:#0f1013';
+    const side = 'liv:16|' + (sideText || 'Daman') + '|' + bodyHex;
+    B.box('chassis', W, 0.16, bl, 0, 1.36, bc);
+    B.box(S, 0.06, 1.56, bl, W / 2 - 0.03, 2.2, bc); B.box(S, 0.06, 1.56, bl, -W / 2 + 0.03, 2.2, bc);
+    B.decal(side, bl, 1.56, W / 2 + 0.004, 2.2, bc, 'right'); B.decal(side, bl, 1.56, -W / 2 - 0.004, 2.2, bc, 'left');
+    for (let k = 1; k < 18; k++){ const z = b1 - k * bl / 18; B.box(R2, 0.07, 1.2, 0.06, W / 2 + 0.03, 2.35, z); B.box(R2, 0.07, 1.2, 0.06, -W / 2 - 0.03, 2.35, z); }
+    B.box(R2, 0.12, 0.1, bl, W / 2, 2.98, bc); B.box(R2, 0.12, 0.1, bl, -W / 2, 2.98, bc);
+    B.box(S, W, 2.55, 0.1, 0, 2.68, b0);                                     // headboard …
+    for (let x = -1.0; x <= 1.01; x += 0.4) B.box(R2, 0.08, 1.0, 0.06, x, 3.45, b0 - 0.07);   // … with slats over the cab
+    B.box(S, W, 1.56, 0.08, 0, 2.2, b1);
+    B.decal('hop', 2.1, 1.0, 0, 2.25, b1 + 0.045, 'rear');
+    B.box('dark', W - 0.12, 0.04, bl - 0.2, 0, 1.46, bc);
+    if (cargo && cargo.bags) bagStack(B, W - 0.3, b0 + 0.15, b1 - 0.15, 1.5, 6);
+    else if (cargo) B.add('cargo:' + cargo.hex, heapGeo(1.12, 1.7, bl / 2 - 0.25, 0.2).translate(0, 1.5, bc));
+    B.box('dark', 0.5, 0.5, 0.9, -W / 2 + 0.3, 0.85, zf + 5.2);            // battery box
+    addRear(B, zr, W, 0.95); mudflaps(B, zr - 0.15, W);
+    B.axle(zf + 1.32, r, W, false, true); B.axle(zf + 3.4, r, W, false, true);
+    B.axle(zf + 6.5, r, W, true); B.axle(zf + 7.9, r, W, true); B.axle(zf + 9.5, r, W, true);
   } else if (id === '18'){
-    info = addCab(B, zf, W, cabHex, rF);
-    B.box('chassis', 1.0, 0.32, 5.6, 0, 1.0, zf + 3.3);
-    B.cyl('dark', 0.7, 0.7, 0.14, 16, 0, 1.25, zf + 4.9);                       // fifth wheel
-    const t0 = zf + 3.6, t1 = zr, tl = t1 - t0, tc = (t0 + t1) / 2;
-    B.box('chassis', W + 0.05, 0.3, tl, 0, 1.55, tc);                           // flatbed deck
-    B.box('paint:' + bodyHex, 0.07, 0.6, tl, W / 2, 2.0, tc); B.box('paint:' + bodyHex, 0.07, 0.6, tl, -W / 2, 2.0, tc);
-    B.box('paint:' + bodyHex, W, 1.3, 0.1, 0, 2.35, t0);
-    B.box('paint:' + bodyHex, W, 0.6, 0.08, 0, 2.0, t1 - 0.04);
-    for (let z = t0 + 1.2; z < t1 - 0.5; z += 1.5){ B.box('chassis', 0.1, 0.95, 0.1, W / 2 + 0.02, 2.15, z); B.box('chassis', 0.1, 0.95, 0.1, -W / 2 - 0.02, 2.15, z); }
-    if (cargo && cargo.bags) bagStack(B, W - 0.25, t0 + 0.2, t1 - 0.2, 1.7, 3);                 // cement bags
-    else if (cargo) B.add('cargo:' + cargo.hex, heapGeo(1.12, 0.78, (tl - 0.9) / 2, 0.22).translate(0, 1.72, tc));  // coal / ore heap
-    else for (const z of [t0 + 2.2, t0 + 4.9, t0 + 7.6]){                        // steel coils on wooden sleepers
-      B.box('wood', 2.0, 0.16, 1.6, 0, 1.78, z);
-      B.add('steel', tr(new THREE.CylinderGeometry(0.85, 0.85, 1.35, 20), 0, 2.72, z, Math.PI / 2));
-      B.add('dark', tr(new THREE.CylinderGeometry(0.3, 0.3, 1.37, 12), 0, 2.72, z, Math.PI / 2));
+    // Daman AIP Group tipper, tractor + semi-trailer, from the owner's photo: modern white cab, navy tipper box with
+    // posts and an orange stripe, sacks piled at the front, muddy wheels (steer, drive, three trailer axles)
+    const r = 0.56;
+    B.wheelMat = MAT.wheelMud;
+    info = addCabModern(B, zf, W, cabHex, r, { tankZ: 3.3, steer: [1.9] });
+    B.box('chassis', 1.0, 0.32, 5.4, 0, 1.0, zf + 3.2);                     // tractor frame
+    B.cyl('dark', 0.7, 0.7, 0.14, 16, 0, 1.28, zf + 4.9);                    // fifth wheel
+    B.box('dark', 0.5, 0.08, 1.3, W / 2 - 0.25, r * 2 + 0.12, zf + 5.2); B.box('dark', 0.5, 0.08, 1.3, -W / 2 + 0.25, r * 2 + 0.12, zf + 5.2);
+    const t0 = zf + 3.9, t1 = zr - 0.1, tl = t1 - t0, tc = (t0 + t1) / 2, N = 'paint:' + bodyHex, P2 = 'paint:#10141e';
+    const side = 'liv:tip|' + (sideText || 'Daman') + '|' + bodyHex;
+    B.box('chassis', 1.1, 0.3, tl - 0.4, 0, 1.2, tc + 0.2);                  // trailer frame
+    B.box(P2, W, 0.18, tl, 0, 1.44, tc);                                      // tipper floor
+    B.box(N, 0.07, 1.78, tl, W / 2 - 0.035, 2.4, tc); B.box(N, 0.07, 1.78, tl, -W / 2 + 0.035, 2.4, tc);
+    B.decal(side, tl, 1.78, W / 2 + 0.004, 2.4, tc, 'right'); B.decal(side, tl, 1.78, -W / 2 - 0.004, 2.4, tc, 'left');
+    for (let k = 0; k <= 4; k++){ const z = t1 - k * tl / 4 - (k === 4 ? -0.05 : 0) + (k === 0 ? -0.05 : 0); B.box(P2, 0.1, 1.9, 0.12, W / 2 + 0.04, 2.4, z); B.box(P2, 0.1, 1.9, 0.12, -W / 2 - 0.04, 2.4, z); }
+    B.box(P2, 0.14, 0.12, tl, W / 2 + 0.02, 3.32, tc); B.box(P2, 0.14, 0.12, tl, -W / 2 - 0.02, 3.32, tc);   // top rails
+    B.box(P2, 0.14, 0.12, tl, W / 2 + 0.02, 1.5, tc); B.box(P2, 0.14, 0.12, tl, -W / 2 - 0.02, 1.5, tc);     // bottom rails
+    B.box(N, W, 2.15, 0.1, 0, 2.58, t0);                                      // front wall, higher than the sides
+    B.box(N, W, 1.78, 0.1, 0, 2.4, t1);
+    B.decal('hop', 2.0, 0.9, 0, 2.3, t1 + 0.055, 'rear');
+    B.box('dark', W - 0.12, 0.04, tl - 0.2, 0, 1.55, tc);
+    if (cargo && cargo.bags) bagStack(B, W - 0.3, t0 + 0.15, t1 - 0.15, 1.6, 7);
+    else if (cargo) B.add('cargo:' + cargo.hex, heapGeo(1.14, 1.95, tl / 2 - 0.3, 0.2).translate(0, 1.58, tc));
+    else for (let i = 0; i < 9; i++){                                         // sacks piled at the front, as on the photo
+      const x = -0.7 + (i % 3) * 0.7, y = 3.45 + Math.floor(i / 3) * 0.22, z = t0 + 0.55 + (i % 2) * 0.1;
+      B.add('sack', tr(new THREE.SphereGeometry(0.34, 10, 7), x, y, z, 0, i * 0.7, 0, 1, 0.45, 0.8));
     }
-    B.box('dark', 0.15, 1.0, 0.15, W / 2 - 0.3, 0.9, t0 + 2.0); B.box('dark', 0.15, 1.0, 0.15, -W / 2 + 0.3, 0.9, t0 + 2.0);   // landing legs
-    B.box('chassis', 0.06, 0.25, tl - 6, W / 2 - 0.1, 1.1, tc - 1); B.box('chassis', 0.06, 0.25, tl - 6, -W / 2 + 0.1, 1.1, tc - 1);
-    B.decal('hop', 2.0, 0.5, 0, 1.55, t1 + 0.04, 'rear');
-    addRear(B, zr, W, 1.05); mudflaps(B, zr - 0.2, W);
-    B.axle(zf + 1.3, rF, W, false, true); B.axle(zf + 4.4, rR, W, true); B.axle(zf + 5.65, rR, W, true);
-    B.axle(zr - 2.7, rR, W, true); B.axle(zr - 1.45, rR, W, true);
+    B.box('dark', 0.12, 1.0, 0.12, W / 2 - 0.35, 0.8, t0 + 2.0); B.box('dark', 0.12, 1.0, 0.12, -W / 2 + 0.35, 0.8, t0 + 2.0);   // landing legs
+    addRear(B, zr, W, 1.0); mudflaps(B, zr - 0.2, W);
+    B.axle(zf + 1.9, r, W, false, true); B.axle(zf + 5.2, r, W, true);
+    B.axle(zf + 8.45, r, W, true); B.axle(zf + 9.65, r, W, true); B.axle(zf + 10.85, r, W, true);
   } else {
-    info = addCab(B, zf, W, cabHex, rF, 3.9);
+    // Daman AIP Group fuel tanker from the owner's photo: white cab with a roof rack, a big stainless tank with the
+    // company livery wrapped round both sides, top walkway and rails, side guard rails, chevron rear guard
+    const r = 0.56, R = 1.22, ty = 2.72;
+    B.wheelMat = MAT.wheelBlack;
+    info = addCabModern(B, zf, W, cabHex, r, { rack: true, grey: true, tankZ: 5.0, steer: [1.2, 3.1] });
     B.box('chassis', 1.0, 0.32, L - 1.0, 0, 1.0, 0.3);
-    const t0 = zf + 2.6, t1 = zr - 0.35, tl = t1 - t0, tc = (t0 + t1) / 2;
-    B.add('tank', tr(new THREE.CylinderGeometry(1.15, 1.15, tl - 0.5, 28, 1, true), 0, 2.45, tc, Math.PI / 2));
-    B.add('tank', tr(new THREE.SphereGeometry(1.15, 20, 12), 0, 2.45, t0 + 0.25, 0, 0, 0, 1, 1, 0.22));
-    B.add('tank', tr(new THREE.SphereGeometry(1.15, 20, 12), 0, 2.45, t1 - 0.25, 0, 0, 0, 1, 1, 0.22));
-    B.decal('diesel', tl - 1.2, 0.72, 1.16, 2.45, tc, 'right');
-    B.decal('diesel', tl - 1.2, 0.72, -1.16, 2.45, tc, 'left');
-    B.box('dark', 0.55, 0.06, tl - 1, 0, 3.62, tc);
-    for (const z of [t0 + 1.4, tc, t1 - 1.4]) B.cyl('chrome', 0.32, 0.32, 0.14, 16, 0, 3.62, z);
-    for (let z = t0 + 0.6; z < t1; z += 1.3){ B.box('chrome', 0.04, 0.4, 0.04, 0.32, 3.85, z); B.box('chrome', 0.04, 0.4, 0.04, -0.32, 3.85, z); }
-    B.box('chrome', 0.04, 0.04, tl - 1, 0.32, 4.05, tc); B.box('chrome', 0.04, 0.04, tl - 1, -0.32, 4.05, tc);
-    for (let y = 1.4; y < 3.6; y += 0.35) B.box('chrome', 0.5, 0.04, 0.04, 0.5, y, t1 + 0.12);
-    for (const z of [t0 + 1, tc, t1 - 1]) B.box('chassis', W - 0.3, 0.45, 0.25, 0, 1.3, z);
-    B.box('paint:#c62828', 0.35, 0.5, 0.25, W / 2 - 0.3, 1.0, tc);              // fire extinguisher box
-    B.decal('hop', 1.7, 0.6, -0.35, 1.05, zr + 0.11, 'rear');
-    addRear(B, zr, W, 0.8); mudflaps(B, zr - 0.25, W);
-    B.axle(zf + 1.3, rF, W, false, true); B.axle(zf + 2.75, rF, W, false, true);
-    B.axle(zr - 2.4, rR, W, true); B.axle(zr - 1.15, rR, W, true);
+    const t0 = zf + 2.55, t1 = zr - 0.3, tl = t1 - t0, tc = (t0 + t1) / 2;
+    B.add('tank', tr(new THREE.CylinderGeometry(R, R, tl - 0.5, 32, 1, true), 0, ty, tc, Math.PI / 2));
+    B.add('tank', tr(new THREE.SphereGeometry(R, 24, 12), 0, ty, t0 + 0.25, 0, 0, 0, 1, 1, 0.22));
+    B.add('tank', tr(new THREE.SphereGeometry(R, 24, 12), 0, ty, t1 - 0.25, 0, 0, 0, 1, 1, 0.22));
+    for (const s of [1, -1]){                                                 // livery bands wrapped round each side
+      const th0 = (s > 0 ? Math.PI / 2 : Math.PI * 1.5) - 0.95;
+      const g = new THREE.CylinderGeometry(R + 0.006, R + 0.006, tl - 0.7, 24, 1, true, th0, 1.9), uv = g.attributes.uv;
+      for (let i = 0; i < uv.count; i++){ const u = uv.getX(i), v = uv.getY(i); uv.setXY(i, s > 0 ? 1 - v : v, s > 0 ? u : 1 - u); }
+      B.add('liv:tank|' + (sideText || 'Daman') + '|' + bodyHex, tr(g, 0, ty, tc, Math.PI / 2));
+    }
+    for (const z of [t0 + 0.8, t0 + 3.2, t1 - 3.2, t1 - 0.8]) B.box('chassis', W - 0.3, 0.5, 0.25, 0, 1.45, z);   // cradles
+    B.box('dark', 0.55, 0.06, tl - 1, 0, ty + R + 0.02, tc);                  // walkway
+    for (const z of [t0 + 1.4, tc, t1 - 1.4]) B.cyl('chrome', 0.3, 0.3, 0.14, 16, 0, ty + R + 0.02, z);   // manholes
+    for (let z = t0 + 0.6; z < t1; z += 1.3){ B.box('chrome', 0.04, 0.4, 0.04, 0.32, ty + R + 0.25, z); B.box('chrome', 0.04, 0.4, 0.04, -0.32, ty + R + 0.25, z); }
+    B.box('chrome', 0.04, 0.04, tl - 1, 0.32, ty + R + 0.45, tc); B.box('chrome', 0.04, 0.04, tl - 1, -0.32, ty + R + 0.45, tc);
+    for (const sx of [1, -1]){                                                // side guard rails with triangle braces
+      B.box('steel', 0.06, 0.08, 4.4, sx * (W / 2 - 0.05), 1.15, zf + 5.35);
+      for (const z of [3.9, 5.35, 6.8]){ B.box('steel', 0.05, 0.55, 0.05, sx * (W / 2 - 0.1), 1.38, zf + z - 0.25, 0.5); B.box('steel', 0.05, 0.55, 0.05, sx * (W / 2 - 0.1), 1.38, zf + z + 0.25, -0.5); }
+    }
+    B.decal('chev', W - 0.2, 0.22, 0, 0.8, zr + 0.2, 'rear');                 // chevron rear guard
+    B.box('dark', W - 0.2, 0.26, 0.16, 0, 0.8, zr + 0.1);
+    for (let y = 1.4; y < 3.6; y += 0.35) B.box('chrome', 0.5, 0.04, 0.04, 0.5, y, t1 + 0.14);   // rear ladder
+    B.decal('hop', 1.7, 0.6, -0.35, 1.25, zr + 0.11, 'rear');
+    addRear(B, zr, W, 0.95); mudflaps(B, zr - 0.25, W);
+    B.axle(zf + 1.2, r, W, false, true); B.axle(zf + 3.1, r, W, false, true);
+    B.axle(zf + 6.2, r, W, true); B.axle(zf + 7.8, r, W, true); B.axle(zf + 9.3, r, W, true);
   }
   const g = B.build();
   return { grp: g, L, W, id, exhaust: info.exhaust, axles: B.axles, rearZ: zr - 1.5 };
@@ -2163,8 +2369,10 @@ function makeTrafficTemplates(){
   for (const c of carCols) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'car'), { w: 3 }));
   for (const c of ['#1b8a4b', '#e9edf1', '#1f5fa8']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'pickup'), { w: 1.4 }));
   for (const c of ['#b3202a', '#1f5fa8', '#e07b1a']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'bus'), { w: 1.2 }));
-  const tk = [['14', '#1b8a4b', '#f2a900', null, 'Safar'], ['14', '#1f5fa8', '#e05a4a', null, 'Bharat'], ['16', '#e9edf1', '#e07b1a'], ['tank', '#c62828', '#c62828'], ['18', '#c62828', '#2c3e50'], ['16', '#6a2c91', '#f2b705'],
-    ['16', '#1f5fa8', '#e07b1a', 'COAL'], ['18', '#1b8a4b', '#2c3e50', 'CEMENT'], ['16', '#c62828', '#8a5a3a', 'IRON ORE']];
+  // other fleets on the road: same truck shapes, their own colours and a word of their own instead of the Daman livery
+  const tk = [['14', '#1b8a4b', '#f2a900', null, 'Safar'], ['14', '#1f5fa8', '#e05a4a', null, 'Bharat'], ['16', '#e9edf1', '#e07b1a', null, 'Hind'], ['tank', '#c62828', '#c62828', null, 'Bharat'],
+    ['18', '#c62828', '#2c3e50', null, 'Safar'], ['16', '#6a2c91', '#f2b705', null, 'Safar'],
+    ['16', '#1f5fa8', '#e07b1a', 'COAL', 'Bharat'], ['18', '#1b8a4b', '#3a2c50', 'CEMENT', 'Hind'], ['16', '#c62828', '#8a5a3a', 'IRON ORE', 'Hind']];
   for (const [id, a, b, c, s] of tk){ const t = buildTruck(id, a, b, c ? CARGO[c] : null, s); TRAFFIC_TPL.push({ grp: t.grp, L: t.L, W: t.W, kind: 'truck', w: id === '18' ? 0.6 : 1 }); }
 }
 function cloneVehicle(tpl){
