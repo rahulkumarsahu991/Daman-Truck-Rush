@@ -274,6 +274,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .res-earn span{color:var(--muted)} .res-earn b{color:#ffcf4a;font-variant-numeric:tabular-nums;text-align:right}
 .res-earn .tot{border-top:1px solid var(--line);padding-top:.3em;margin-top:.1em;color:var(--text);font-weight:700}
 .res-earn b.tot{color:var(--amber-2);font:600 1.35em/1 'Teko',sans-serif}
+.res-earn b.neg{color:#ff6a5e}
 .res-ms{list-style:none;margin:0;padding:0;display:grid;gap:.2em;font-size:.82em}
 .res-ms li{display:flex;justify-content:space-between;gap:.6em;color:var(--muted)}
 .res-ms li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -986,6 +987,10 @@ TEX.visor = canvasTex(512, 64, (g, w, h) => {                   // red DAMAN let
   g.clearRect(0, 0, w, h); g.fillStyle = '#c8211d'; g.textAlign = 'center'; g.textBaseline = 'middle';
   fitText(g, 'DAMAN', w - 40, 56, 700, "Georgia,'Times New Roman',serif"); g.fillText('DAMAN', w / 2, h / 2 + 3);
 });
+TEX.policeTxt = canvasTex(256, 64, (g, w, h) => {              // POLICE lettering + stripe on a patrol car
+  g.clearRect(0, 0, w, h); g.fillStyle = '#c62828'; g.fillRect(0, h - 12, w, 8);
+  g.fillStyle = '#1b4fa0'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 40px ${FONT_B}`; g.fillText('POLICE', w / 2, h / 2 - 4);
+});
 TEX.chev = canvasTex(256, 32, (g, w, h) => {                   // yellow / black chevrons on a rear guard
   g.fillStyle = '#f2c230'; g.fillRect(0, 0, w, h); g.fillStyle = '#16171a';
   for (let x = -h; x < w + h; x += 32){ g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 16, 0); g.lineTo(x + 16 + h, h); g.lineTo(x + h, h); g.fill(); }
@@ -1209,6 +1214,9 @@ const MAT = {
   sack: stdMat({ color: 0x8a6a4a, roughness: 0.95, flatShading: true }),
   visor: stdMat({ map: TEX.visor, transparent: true, alphaTest: 0.4, roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -3 }),
   chev: stdMat({ map: TEX.chev, roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -2 }),
+  policeTxt: stdMat({ map: TEX.policeTxt, transparent: true, alphaTest: 0.35, roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -2 }),
+  policeRed: new THREE.MeshStandardMaterial({ color: 0x550000, emissive: 0xff1a1a, emissiveIntensity: 2 }),
+  policeBlue: new THREE.MeshStandardMaterial({ color: 0x001a55, emissive: 0x1a5cff, emissiveIntensity: 0.2 }),
   head: stdMat({ color: 0xffffff, emissive: 0xfff1c4, emissiveIntensity: 0.4 }),
   tail: stdMat({ color: 0x5a0a06, emissive: 0xff2a14, emissiveIntensity: 0.5 }),
   amber: stdMat({ color: 0x7a4a00, emissive: 0xffa000, emissiveIntensity: 0.5 }),
@@ -1420,11 +1428,13 @@ function placeOnRoad(obj, s, l, h, yawOff, roll, pitchOff){
 // terrain height, flattened to road level under each pump's forecourt
 function groundH(s, l){
   const h = groundH0(s, l);
-  if (l >= -ROAD_HALF || l < -40) return h;
+  if (l >= -ROAD_HALF || l < -60) return h;
   const k = Math.floor(s / CH);
-  let f = 0;
+  let f = 0, reach = 40;                                        // flat ground for the pump forecourts, the head office and the unloading yard
   for (const kk of [k - 1, k, k + 1]) if (isPumpChunk(kk)) f = Math.max(f, clamp((30 - Math.abs(s - pumpS(kk))) / 8, 0, 1));
-  return f ? lerp(h, -0.08, f * clamp((l + 40) / 8, 0, 1)) : h;
+  if (s < 90) f = Math.max(f, clamp((75 - s) / 8, 0, 1));
+  if (G.unloadS > 0){ const fy = clamp((34 - Math.abs(s - G.unloadS)) / 8, 0, 1); if (fy > 0){ f = Math.max(f, fy); reach = 58; } }
+  return f ? lerp(h, -0.08, f * clamp((l + reach) / 8, 0, 1)) : h;
 }
 function groundH0(s, l){
   let d, left = l < 0;
@@ -1442,17 +1452,48 @@ function groundH0(s, l){
 }
 
 /* ---------------- road texture / materials that depend on route ---------------- */
+// one tile = 14 m across × 48 m along (ROAD_TILE): worn highway tar with patches, cracks, tyre tracks, gravel shoulders and road studs
+const ROAD_TILE = 48;
 function makeRoadTex(){
-  return canvasTex(256, 512, (g, w, h) => {
-    const U = l => (l + 7) / 14 * w;
+  return canvasTex(512, 2048, (g, w, h) => {
+    const r = rng(4242 + RI * 131), U = l => (l + 7) / 14 * w, M = h / ROAD_TILE;   // M = pixels per metre along the road
     g.fillStyle = R.road; g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 6000; i++){ const v = Math.random() < 0.5 ? 0 : 255; g.fillStyle = `rgba(${v},${v},${v},${Math.random() * 0.07})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
-    g.fillStyle = 'rgba(0,0,0,.10)';
-    for (const lc of LANES) for (const o of [-0.95, 0.95]) g.fillRect(U(lc + o) - 7, 0, 14, h);
-    g.fillStyle = R.shoulder; g.fillRect(0, 0, U(-5.6), h); g.fillRect(U(5.6), 0, w - U(5.6), h);
-    g.fillStyle = '#f2f2ee'; g.fillRect(U(-5.5) - 3, 0, 5, h);
-    g.fillStyle = '#f5c518'; g.fillRect(U(5.5) - 2, 0, 5, h);
-    g.fillStyle = '#f2f2ee'; for (const lx of [-1.8, 1.8]) g.fillRect(U(lx) - 2.5, 0, 5, h * 0.375);
+    const blob = (x, y, rad, col) => { for (const dy of [-h, 0, h]){ const gr = g.createRadialGradient(x, y + dy, 0, x, y + dy, rad); gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(x - rad, y + dy - rad, rad * 2, rad * 2); } };
+    for (let i = 0; i < 28; i++) blob(r() * w, r() * h, 40 + r() * 150, r() < 0.5 ? 'rgba(255,255,255,.04)' : 'rgba(0,0,0,.07)');   // older / newer tar
+    for (const lc of LANES) for (const o of [-0.95, 0.95]){                                   // tyre-polished wheel tracks
+      const x = U(lc + o), gr = g.createLinearGradient(x - 18, 0, x + 18, 0);
+      gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.5, 'rgba(0,0,0,.15)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(x - 18, 0, 36, h);
+    }
+    for (const lc of LANES) for (let y = 20 + r() * 60; y < h - 30; y += 30 + r() * 110){      // oil drips down the middle of each lane
+      g.fillStyle = `rgba(8,8,10,${0.05 + r() * 0.12})`; g.beginPath(); g.ellipse(U(lc) + (r() - 0.5) * 30, y, 3 + r() * 9, 5 + r() * 16, 0, 0, Math.PI * 2); g.fill();
+    }
+    for (let i = 0; i < 7; i++){                                                              // repaired patches of fresher tar
+      const lc = LANES[Math.floor(r() * 3)], pw = (1.2 + r() * 2) * w / 14, ph = (1 + r() * 3.5) * M, x = U(lc + (r() - 0.5) * 1.6) - pw / 2, y = 20 + r() * (h - ph - 40);
+      g.fillStyle = 'rgba(10,10,12,.13)'; g.fillRect(x, y, pw, ph); g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 2; g.strokeRect(x, y, pw, ph);
+    }
+    g.strokeStyle = 'rgba(8,8,10,.5)'; g.lineCap = 'round'; g.lineJoin = 'round';
+    const crack = (x, y, n, a, wid) => { g.lineWidth = wid; g.beginPath(); g.moveTo(x, y); for (let i = 0; i < n; i++){ a += (r() - 0.5) * 0.9; x += Math.sin(a) * 6; y += Math.cos(a) * 6; g.lineTo(x, y); } g.stroke(); };
+    for (let i = 0; i < 10; i++){ const e = r() < 0.5 ? -5.05 : 5.05; crack(U(e + (r() - 0.5) * 0.5), 30 + r() * (h - 360), 20 + r() * 30, 0, 1.5); }   // long edge cracks
+    for (let i = 0; i < 18; i++) crack(U(-4.6 + r() * 9.2), 60 + r() * (h - 160), 4 + r() * 8, r() * Math.PI * 2, 1);                     // short ones
+    g.fillStyle = R.shoulder; g.fillRect(0, 0, U(-5.6), h); g.fillRect(U(5.6), 0, w - U(5.6), h);    // gravel shoulders
+    for (let i = 0; i < 9000; i++){
+      const x = r() < 0.5 ? r() * U(-5.6) : U(5.6) + r() * (w - U(5.6)), v = r() < 0.5 ? 45 : 215, sz = 1 + r() * 2.5;
+      g.fillStyle = `rgba(${v},${v - 6},${v - 14},${0.12 + r() * 0.22})`; g.fillRect(x, r() * h, sz, sz);
+    }
+    for (const e of [-5.6, 5.6]) for (let y = 0; y < h; y += 4){ g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(U(e) - 1.5 + (r() - 0.5) * 3, y, 3, 4); }   // ragged tar edge
+    g.fillStyle = '#eeede6'; g.fillRect(U(-5.5) - 4, 0, 8, h);                               // white edge line (left)
+    g.fillStyle = '#f2c318'; g.fillRect(U(5.5) - 4, 0, 8, h);                                // yellow edge line (median side)
+    g.fillStyle = '#eeede6'; for (const lx of [-1.8, 1.8]) for (let p = 0; p < ROAD_TILE / 12; p++) g.fillRect(U(lx) - 3.5, p * 12 * M, 7, 4.5 * M);   // 4.5 m dash, 7.5 m gap
+    g.fillStyle = R.road;                                                                    // traffic has worn the paint
+    for (let i = 0; i < 2600; i++){ const lx = [-5.5, 5.5, -1.8, 1.8][Math.floor(r() * 4)]; g.globalAlpha = 0.2 + r() * 0.5; g.fillRect(U(lx) + (r() - 0.5) * 9, r() * h, 1 + r() * 3, 1 + r() * 3); }
+    g.globalAlpha = 1;
+    for (let p = 0; p < ROAD_TILE / 12; p++){                                                // road studs (cat's eyes)
+      const y = (p * 12 + 8.2) * M;
+      for (const [lx, c] of [[-1.8, '#fff6c8'], [1.8, '#fff6c8'], [-5.25, '#ff4a3a'], [5.25, '#ffb21a']]){ g.fillStyle = '#cfcfc8'; g.fillRect(U(lx) - 4, y - 3, 8, 7); g.fillStyle = c; g.fillRect(U(lx) - 3, y - 1, 6, 3); }
+    }
+    const img = g.getImageData(0, 0, w, h), d = img.data;                                    // fine aggregate grain over everything
+    for (let i = 0; i < d.length; i += 4){ const n = (r() - 0.5) * 22 + (r() < 0.015 ? 28 : 0); d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+    g.putImageData(img, 0, 0);
   }, true);
 }
 const roadMat = stdMat({ roughness: 0.92, metalness: 0.0 });
@@ -1600,6 +1641,7 @@ function makePools(){
   POOLS.mountain = new Pool([{ geo: tr(new THREE.ConeGeometry(1, 1, 7, 1), 0, 0.5, 0), mat: lam(0xffffff, { flatShading: true }), colorable: true },
     { geo: tr(new THREE.ConeGeometry(1, 1, 7, 1), 0, 0.5, 0), mat: lam(0xf4f7fa, { flatShading: true }), local: new THREE.Matrix4().compose(new THREE.Vector3(0, 0.64, 0), new THREE.Quaternion(), new THREE.Vector3(0.36, 0.36, 0.36)) }], 140);
   POOLS.post = new Pool([{ geo: tr(new THREE.BoxGeometry(0.14, 0.85, 0.14), 0, 0.42, 0), mat: lam(0x9aa1a8) }], 700);
+  makePlacePools();
 }
 
 /* ---------------- one-off landmark templates ---------------- */
@@ -1718,7 +1760,7 @@ function getBillTex(i){
 /* ---------------- chunks ---------------- */
 const CH = 60, AHEAD = 640, BEHIND = 80;
 const chunks = new Map();
-const GROUND_L = [-7, -8.5, -11, -15, -22, -35, -60, -100, -170, -320];
+const GROUND_L = [-7, -8.5, -11, -15, -22, -35, -50, -60, -100, -170, -320];   // -50: the back wall of the unloading yard
 const GROUND_R = [24, 25.5, 28, 32, 40, 55, 80, 120, 190, 340];
 const cG1 = new THREE.Color(), cG2 = new THREE.Color();
 function groundColor(s, l, out){
@@ -1744,8 +1786,8 @@ function buildChunk(k){
   const s0 = k * CH, s1 = s0 + CH, grp = new THREE.Group(), inst = [];
   const rnd = rng(k * 9973 + RI * 7919 + 17);
   // road surfaces
-  addOwned(grp, stripGeo(s0, s1, 3, [-7, 7], () => 0.02, (j, l, s) => [(l + 7) / 14, s / 12]), roadMat, true);
-  addOwned(grp, stripGeo(s0, s1, 3, [10, 24], () => 0.02, (j, l, s) => [1 - (l - 10) / 14, s / 12]), roadMat, true);
+  addOwned(grp, stripGeo(s0, s1, 3, [-7, 7], () => 0.02, (j, l, s) => [(l + 7) / 14, s / ROAD_TILE]), roadMat, true);
+  addOwned(grp, stripGeo(s0, s1, 3, [10, 24], () => 0.02, (j, l, s) => [1 - (l - 10) / 14, s / ROAD_TILE]), roadMat, true);
   // median
   const medTop = R.median === 'lights' ? 0.2 : 0.16;
   addOwned(grp, stripGeo(s0, s1, 3, [7, 10], () => medTop, (j, l, s) => [0, 0]), medianMat, true);
@@ -1778,8 +1820,9 @@ function buildChunk(k){
   // roadside scenery (weighted random types per route)
   const types = Object.entries(R.scen), total = types.reduce((a, t) => a + t[1], 0);
   const perSide = Math.round(total * 1.3);
+  const nearYard = G.unloadS > 0 && G.unloadS > s0 - 60 && G.unloadS < s1 + 60;
   for (const side of [-1, 1]){
-    if (side < 0 && pumpHere) continue;                         // keep the pump forecourt clear
+    if (side < 0 && (pumpHere || k <= 1 || nearYard)) continue;  // keep the pump forecourt, the head office and the unloading yard clear
     for (let n = 0; n < perSide; n++){
       let r = rnd() * total, type = types[0][0];
       for (const [t, w] of types){ if ((r -= w) <= 0){ type = t; break; } }
@@ -1814,6 +1857,15 @@ function buildChunk(k){
     _c.set(R.mount).multiplyScalar(0.85 + rnd() * 0.3);
     placeInst('mountain', inst, s0 + rnd() * CH, l, groundH(s0, l) - 4, rnd() * 6, r, R.snowcap || R.sides === 'ghat' ? hgt : hgt * 0.7, r, _c);
   }
+  // places: the Daman Group office at the start, toll plazas, police nakas and their warning signs, electric poles
+  if (k === 0) addOffice(grp);
+  if (isTollChunk(k)) addTollPlaza(grp, tollS(k));
+  if (isTollChunk(k + 3)) addRoadSign(grp, s0 + 30, 'board', 'TOLL PLAZA|180 m • slow to 40');
+  if (isTollChunk(k + 2)) addRoadSign(grp, s0 + 30, 'limit', '40');
+  if (isNakaChunk(k)) addNaka(grp, nakaS(k));
+  if (isNakaChunk(k + 2)) addRoadSign(grp, s0 + 30, 'limit', '80');
+  if (k > 1 && !pumpHere && !nearYard && !isNakaChunk(k) && R.sides !== 'city')
+    for (let s = s0 + 8; s < s1; s += 45) placeInst('epole', inst, s, -ROAD_HALF - 3.6, groundH(s, -10.6), -Math.atan(slopeX(s)), 1, 1, 1);
   // landmarks
   const kmMark = Math.floor(s1 / 1000);
   if (Math.floor(s0 / 1000) !== kmMark) addMilestone(grp, kmMark * 1000);
@@ -1826,9 +1878,11 @@ function buildChunk(k){
     const d = TPL.dhaba.clone();
     placeOnRoad(d, s0 + 30, -ROAD_HALF - 12, groundH(s0 + 30, -19) + 0.05, Math.PI / 2);
     d.traverse(o => { if (o.isMesh){ o.castShadow = true; } }); grp.add(d);
+    const trucks = TRAFFIC_TPL.filter(t => t.kind === 'truck');                // a truck parked up for chai
+    if (trucks.length){ const pt = trucks[k % trucks.length].grp.clone(); placeOnRoad(pt, s0 + 44, -ROAD_HALF - 5.2, groundH(s0 + 44, -12.2), 0.08); pt.rotation.x = 0; pt.rotation.z = 0; grp.add(pt); }
   }
   if (k % 9 === 3){
-    const b = TPL.billboard.clone(), side = pumpHere || rnd() < 0.5 ? 1 : -1, bl = side < 0 ? -ROAD_HALF - 9 : 24 + 8;
+    const b = TPL.billboard.clone(), side = pumpHere || nearYard || rnd() < 0.5 ? 1 : -1, bl = side < 0 ? -ROAD_HALF - 9 : 24 + 8;
     const board = new THREE.Mesh(tr(new THREE.PlaneGeometry(9, 4), 0, 7.2, 0), new THREE.MeshLambertMaterial({ map: getBillTex(k % BILL_TEX.length), emissive: 0xffffff, emissiveMap: getBillTex(k % BILL_TEX.length), emissiveIntensity: 0.1 }));
     board.userData.own = true; b.add(board);
     placeOnRoad(b, s0 + 25, bl, groundH(s0 + 25, bl), side < 0 ? 0.35 : -0.35);
@@ -1982,6 +2036,11 @@ class Builder {
     m.position.set(0, r, z); m.rotation.order = 'YXZ'; m.castShadow = true;
     m.userData.r = r; m.userData.steer = !!steer; m.userData.axle = true;
     this.axles.push(m);
+  }
+  axle1(z, r){                                                    // one wheel on the centre line (motorcycles)
+    const m = new THREE.Mesh(wheelGeo(r, 0.12), this.wheelMat || MAT.wheel);
+    m.position.set(0, r, z); m.rotation.order = 'YXZ'; m.castShadow = true;
+    m.userData.r = r; m.userData.axle = true; this.axles.push(m);
   }
   glow(kind, x, y, z, s){ this.glows.push([kind, x, y, z, s]); }
   build(){
@@ -2319,8 +2378,56 @@ function buildTruck(id, cabHex, bodyHex, cargo, sideText){
   const g = B.build();
   return { grp: g, L, W, id, exhaust: info.exhaust, axles: B.axles, rearZ: zr - 1.5 };
 }
-function buildCar(hex, kind){
+function buildCar(hex, kind, parked){
   const B = new Builder();
+  if (kind === 'bike'){
+    // motorcycle with its rider (helmet + shirt colours vary per template); parked bikes come without a rider
+    const L = 2.0, W = 0.8, P = 'paint:' + hex, shirt = 'paint:' + pick(['#e9edf1', '#1f5fa8', '#c62828', '#3d8a3f', '#f2b705', '#6a2c91']), helmet = 'paint:' + pick(['#111214', '#c62828', '#f2f2ee', '#1f5fa8']);
+    B.axle1(-0.66, 0.31); B.axle1(0.66, 0.31);
+    B.box('dark', 0.2, 0.3, 1.05, 0, 0.55, 0);                                  // frame + engine
+    B.box(P, 0.34, 0.22, 0.52, 0, 0.86, -0.2);                                 // tank
+    B.box('dark', 0.3, 0.1, 0.62, 0, 0.84, 0.3);                               // seat
+    B.box(P, 0.24, 0.06, 0.5, 0, 0.72, 0.66);                                  // rear mudguard
+    B.box('dark', 0.7, 0.04, 0.04, 0, 1.08, -0.56);                            // handlebar
+    B.box('dark', 0.05, 0.5, 0.05, 0, 0.85, -0.62, 0.35);                      // fork
+    B.cyl('chrome', 0.05, 0.05, 0.7, 8, 0.16, 0.45, 0.35, Math.PI / 2);        // exhaust
+    B.box('head', 0.16, 0.14, 0.05, 0, 0.98, -0.72); B.glow('white', 0, 0.98, -0.82, 0.8);
+    B.box('tail', 0.12, 0.06, 0.03, 0, 0.8, 0.93); B.glow('red', 0, 0.8, 1.0, 0.6);
+    if (!parked){
+      B.cyl('paint:#2f3a4f', 0.08, 0.07, 0.62, 7, 0.17, 0.72, 0.05, 0.9); B.cyl('paint:#2f3a4f', 0.08, 0.07, 0.62, 7, -0.17, 0.72, 0.05, 0.9);   // thighs
+      B.cyl('paint:#2f3a4f', 0.06, 0.05, 0.5, 7, 0.2, 0.42, -0.2); B.cyl('paint:#2f3a4f', 0.06, 0.05, 0.5, 7, -0.2, 0.42, -0.2);                   // shins
+      B.add(shirt, tr(new THREE.CylinderGeometry(0.2, 0.17, 0.6, 9), 0, 1.25, 0.22, -0.35, 0, 0, 1, 1, 0.72));                                     // torso, leaning in
+      B.cyl(shirt, 0.055, 0.05, 0.62, 6, 0.24, 1.18, -0.2, 1.05); B.cyl(shirt, 0.055, 0.05, 0.62, 6, -0.24, 1.18, -0.2, 1.05);                 // arms to the bars
+      B.add(helmet, tr(new THREE.SphereGeometry(0.15, 12, 9), 0, 1.68, 0.02, 0, 0, 0, 1, 1.05, 1.1));
+      B.box('dark', 0.2, 0.07, 0.03, 0, 1.66, -0.14);                          // visor
+    }
+    return { grp: B.build(), L, W, axles: B.axles, kind: 'bike' };
+  }
+  if (kind === 'suv' || kind === 'police'){
+    // big SUV (like the white one outside the Daman office); the police version wears a light bar and POLICE
+    const L = 4.8, W = 1.95, P = 'paint:' + hex;
+    B.box(P, W, 0.85, L, 0, 0.9, 0);
+    B.box('dark', W + 0.02, 0.28, L + 0.02, 0, 0.55, 0);                         // black lower cladding
+    B.box(P, W - 0.1, 0.72, 2.9, 0, 1.68, 0.35);
+    B.box('glass', W - 0.08, 0.52, 2.8, 0, 1.7, 0.35);
+    B.box('glass', W - 0.22, 0.5, 0.06, 0, 1.66, -1.1, -0.45);
+    B.box('glass', W - 0.3, 0.42, 0.06, 0, 1.72, 1.8);
+    B.box(P, W - 0.14, 0.06, 2.6, 0, 2.06, 0.4);
+    for (const sx of [1, -1]) B.box('chrome', 0.04, 0.05, 2.2, sx * (W / 2 - 0.15), 2.12, 0.4);   // roof rails
+    B.box('dark', 1.1, 0.3, 0.05, 0, 0.98, -L / 2 - 0.005);                    // grille
+    B.box('head', 0.36, 0.14, 0.05, -0.68, 1.1, -L / 2 - 0.005); B.box('head', 0.36, 0.14, 0.05, 0.68, 1.1, -L / 2 - 0.005);
+    B.glow('white', -0.68, 1.1, -L / 2 - 0.12, 1.1); B.glow('white', 0.68, 1.1, -L / 2 - 0.12, 1.1);
+    B.box('tail', 0.34, 0.2, 0.05, -0.72, 1.12, L / 2 + 0.005); B.box('tail', 0.34, 0.2, 0.05, 0.72, 1.12, L / 2 + 0.005);
+    B.glow('red', -0.72, 1.12, L / 2 + 0.12, 1.0); B.glow('red', 0.72, 1.12, L / 2 + 0.12, 1.0);
+    if (kind === 'police'){
+      B.box('dark', 1.2, 0.08, 0.3, 0, 2.13, 0.2);
+      B.box('policeRed', 0.55, 0.12, 0.26, -0.3, 2.23, 0.2); B.box('policeBlue', 0.55, 0.12, 0.26, 0.3, 2.23, 0.2);
+      for (const sx of [1, -1]) B.decal('policeTxt', 1.9, 0.48, sx * (W / 2 + 0.006), 0.95, 0.2, sx > 0 ? 'right' : 'left');
+      B.decal('policeTxt', 1.2, 0.3, 0, 1.05, L / 2 + 0.006, 'rear');
+    }
+    B.axle(-L / 2 + 0.95, 0.4, W + 0.05, false, true); B.axle(L / 2 - 0.95, 0.4, W + 0.05, false);
+    return { grp: B.build(), L, W, axles: B.axles, kind: 'car' };
+  }
   if (kind === 'bus'){
     const L = 11, W = 2.5, P = 'paint:' + hex;
     B.box(P, W, 2.2, L - 0.1, 0, 1.75, 0);
@@ -2369,6 +2476,9 @@ function makeTrafficTemplates(){
   for (const c of carCols) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'car'), { w: 3 }));
   for (const c of ['#1b8a4b', '#e9edf1', '#1f5fa8']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'pickup'), { w: 1.4 }));
   for (const c of ['#b3202a', '#1f5fa8', '#e07b1a']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'bus'), { w: 1.2 }));
+  for (const c of ['#1c1f24', '#b3202a', '#1f5fa8', '#3a3d42']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'bike'), { w: 0.75 }));   // two-wheelers
+  for (const c of ['#f1f1ee', '#2b2f36']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'suv'), { w: 1 }));
+  TRAFFIC_TPL.push(Object.assign(buildCar('#f2f2ee', 'police'), { w: 0.35 }));
   // other fleets on the road: same truck shapes, their own colours and a word of their own instead of the Daman livery
   const tk = [['14', '#1b8a4b', '#f2a900', null, 'Safar'], ['14', '#1f5fa8', '#e05a4a', null, 'Bharat'], ['16', '#e9edf1', '#e07b1a', null, 'Hind'], ['tank', '#c62828', '#c62828', null, 'Bharat'],
     ['18', '#c62828', '#2c3e50', null, 'Safar'], ['16', '#6a2c91', '#f2b705', null, 'Safar'],
@@ -2691,6 +2801,234 @@ function poseCrew(wheelAngle, steer, dt){
 }
 
 /* =================================================================
+   PLACES ON THE ROUTE — the Daman Group head office where every run
+   starts (built from the owner's photo), the unloading yard at the
+   destination, toll plazas, police checkpoints (nakas), roadside
+   speed signs and electric poles.
+   Roadside buildings use the pump convention: local +z faces the road.
+   ================================================================= */
+const PLACE = { mats: null, yard: [], sirenMats: [] };
+function placeMats(){
+  if (PLACE.mats) return PLACE.mats;
+  const M = PLACE.mats = {
+    cream: lam(0xf1ede4, { emissive: 0x3a3833 }), white: lam(0xf8f7f3, { emissive: 0x403f3c }),   // a touch of glow keeps the white walls white in shade trim: lam(0x7a4a2a), podium: lam(0xbdb8b0), granite: lam(0x3a3b3f),
+    dark: lam(0x222428), concrete: lam(0xa9a59d), yellow: lam(0xf2c230), khaki: lam(0xb59a64), skin: lam(0x8a5636), beret: lam(0x5a3a22),
+    booth: lam(0xf2f2ee), red: lam(0xc62828), dirt: lam(0x9c8a6e), loader: stdMat({ color: 0xf2b705, roughness: 0.5, metalness: 0.2 }),
+  };
+  return M;
+}
+// flashing police light bars on every patrol car, parked or driving (called every frame while driving)
+function updatePlaces(t){
+  const on = Math.sin(t * 11) > 0;
+  MAT.policeRed.emissiveIntensity = on ? 2.6 : 0.15; MAT.policeBlue.emissiveIntensity = on ? 0.15 : 2.6;
+}
+
+/* ---------------- textures ---------------- */
+function officeSignTex(){
+  return canvasTex(1024, 128, (g, w, h) => {
+    g.fillStyle = '#f6f5f1'; g.fillRect(0, 0, w, h); g.textBaseline = 'middle'; g.font = `800 96px ${FONT_B}`;
+    const a = g.measureText('DAMAN').width, sp = 40, b = g.measureText('GROUP').width, x0 = (w - a - sp - b) / 2;
+    g.textAlign = 'left'; g.fillStyle = '#1f5fb0'; g.fillText('DAMAN', x0, h / 2 + 6); g.fillStyle = '#e39b2d'; g.fillText('GROUP', x0 + a + sp, h / 2 + 6);
+  });
+}
+function interiorTex(kind){                                          // lit interiors behind the glass walls
+  return canvasTex(512, 256, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#dfe6ea'); gr.addColorStop(0.5, '#c9d3d8'); gr.addColorStop(1, '#a9a49a');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#fff6d8'; for (let x = 20; x < w; x += 44) for (let y = 16; y < (kind === 'office' ? 60 : 40); y += 30){ g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }   // ceiling spots
+    g.fillStyle = '#b89a78'; for (const x of kind === 'office' ? [120, 250, 380] : [180]) g.fillRect(x, 20, 26, h - 20);                                           // columns
+    g.fillStyle = '#8a6e52'; if (kind === 'office') for (const x of [40, 300, 420]) g.fillRect(x, h - 70, 70, 34);                                               // desks
+    g.fillStyle = '#2e3a44'; if (kind === 'office'){ g.fillRect(200, h - 110, 14, 70); g.beginPath(); g.arc(207, h - 118, 9, 0, 7); g.fill(); }                   // someone at work
+    g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.moveTo(0, 0); g.lineTo(90, 0); g.lineTo(0, 120); g.fill();                                            // glass sheen
+    g.strokeStyle = 'rgba(40,50,56,.55)'; g.lineWidth = 3; for (let x = 0; x <= w; x += w / 4) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+  });
+}
+function paverTex(){
+  return canvasTex(256, 256, (g, w, h) => {
+    g.fillStyle = '#9b8f82'; g.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 32) for (let x = (y / 32) % 2 * 16; x < w + 32; x += 32){ g.fillStyle = ['#a79a8b', '#8d8175', '#b3a594', '#968a7c'][(x + y) / 16 % 4 | 0]; g.fillRect(x - 15, y + 1, 30, 30); }
+  }, true);
+}
+const signCache = {};
+function roadSignTex(kind, text){                                    // round speed signs and blue info boards
+  const key = kind + text; if (signCache[key]) return signCache[key];
+  return signCache[key] = kind === 'limit'
+    ? canvasTex(128, 128, (g, w, h) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill(); g.strokeStyle = '#d0201a'; g.lineWidth = 14; g.beginPath(); g.arc(64, 64, 52, 0, 7); g.stroke();
+        g.fillStyle = '#111'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 50px ${FONT_B}`; g.fillText(text, 64, 67); })
+    : canvasTex(512, 256, (g, w, h) => { g.fillStyle = '#1b4fa0'; g.fillRect(0, 0, w, h); g.strokeStyle = '#fff'; g.lineWidth = 8; g.strokeRect(10, 10, w - 20, h - 20);
+        g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; const [a, b] = text.split('|');
+        fitText(g, a, w - 60, 78, 700, FONT_D); g.fillText(a, w / 2, 96); g.fillStyle = '#ffd24a'; fitText(g, b || '', w - 60, 56, 700, FONT_D); g.fillText(b || '', w / 2, 180); });
+}
+
+/* ---------------- templates ---------------- */
+function personStanding(shirt, pants, cap){                          // simple standing figure (police, yard staff)
+  const p = new THREE.Group(), M = placeMats();
+  const add = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; p.add(m); };
+  add(merge([tr(new THREE.CylinderGeometry(0.1, 0.09, 0.85, 7), -0.12, 0.43, 0), tr(new THREE.CylinderGeometry(0.1, 0.09, 0.85, 7), 0.12, 0.43, 0)]), pants);
+  add(merge([tr(new THREE.CylinderGeometry(0.2, 0.17, 0.62, 9), 0, 1.16, 0, 0, 0, 0, 1, 1, 0.7), tr(new THREE.CylinderGeometry(0.055, 0.05, 0.62, 6), -0.27, 1.12, 0, 0, 0, 0.12), tr(new THREE.CylinderGeometry(0.055, 0.05, 0.62, 6), 0.27, 1.12, 0, 0, 0, -0.12)]), shirt);
+  add(merge([tr(new THREE.SphereGeometry(0.12, 10, 8), 0, 1.62, 0), tr(new THREE.SphereGeometry(0.045, 6, 5), -0.3, 0.8, 0), tr(new THREE.SphereGeometry(0.045, 6, 5), 0.3, 0.8, 0)]), M.skin);
+  add(tr(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 10), 0, 1.74, 0.01, 0, 0, 0.12), cap);
+  add(tr(new THREE.BoxGeometry(0.36, 0.05, 0.26), 0, 0.88, 0), M.dark);                                           // belt
+  return p;
+}
+function makePlaceTemplates(){
+  const M = placeMats();
+  // ---- Daman Group head office (from the owner's photo) ----
+  const of = new THREE.Group();
+  const box = (grp, mat, w, h, d, x, y, z, shadow) => { const m = new THREE.Mesh(tr(new THREE.BoxGeometry(w, h, d), x, y, z), mat); if (shadow !== false){ m.castShadow = true; m.receiveShadow = true; } grp.add(m); return m; };
+  const face = (grp, mat, w, h, x, y, z) => { const m = new THREE.Mesh(tr(new THREE.PlaneGeometry(w, h), x, y, z), mat); grp.add(m); return m; };
+  box(of, M.podium, 26, 1.4, 12, 0, 0.7, 0);                                  // raised plinth
+  box(of, M.dark, 7.5, 1.1, 0.06, 7.5, 0.55, 6.03, false);                    // basement garage opening
+  box(of, M.cream, 26, 3.6, 12, 0, 3.2, 0);                                   // ground floor
+  const shop = nightLam(interiorTex('shop'), 0.35, 0.9);
+  for (const x of [-10.3, -6.6, -2.9, 0.8]) face(of, shop, 3.4, 2.8, x, 3.05, 6.02);
+  box(of, M.dark, 1.3, 2.5, 0.06, 4.2, 2.65, 6.03, false);                   // side door
+  for (let x = -3; x <= 13.01; x += 2) box(of, MAT.chrome, 0.05, 1.0, 0.05, x, 1.9, 6.5, false);   // walkway railing
+  box(of, MAT.chrome, 16, 0.05, 0.05, 5, 2.4, 6.5, false); box(of, MAT.chrome, 16, 0.04, 0.04, 5, 1.9, 6.5, false);
+  box(of, M.white, 26.4, 1.0, 12.4, 0, 5.5, 0.1);                            // thick white band between the floors
+  box(of, M.cream, 26, 3.4, 12, 0, 7.7, 0);                                   // upper floor
+  face(of, nightLam(interiorTex('office'), 0.35, 1.0), 15.2, 2.9, -4.9, 7.65, 6.02);   // the big glass wall of the office
+  box(of, M.white, 0.7, 3.4, 0.35, 3.0, 7.7, 6.12);
+  box(of, M.dark, 1.4, 2.4, 0.06, 5.6, 7.4, 6.03, false);                    // balcony door
+  face(of, new THREE.MeshStandardMaterial({ color: 0xbfe0ea, transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.3 }), 9.2, 1.0, 8.4, 6.5, 6.35);   // glass balcony rail
+  box(of, M.white, 26.4, 1.6, 12.4, 0, 10.2, 0.1);                           // parapet …
+  face(of, nightLam(officeSignTex(), 0.55, 0.9), 13.5, 1.5, -0.6, 10.2, 6.32); // … with DAMAN GROUP
+  box(of, M.trim, 26.7, 0.2, 12.7, 0, 11.08, 0.1); box(of, M.trim, 0.25, 10.9, 0.3, -13.2, 5.5, 6.15);
+  const logo = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.4, 0.16), [M.dark, M.dark, M.dark, M.dark, MAT.logo, MAT.logo]);
+  logo.position.set(0, 12.55, 1); logo.castShadow = true; of.add(logo);
+  box(of, M.dark, 0.12, 1.2, 0.12, -0.8, 11.6, 1, false); box(of, M.dark, 0.12, 1.2, 0.12, 0.8, 11.6, 1, false);
+  for (const x of [-12.4, 12.4]){ box(of, M.dark, 0.1, 2.6, 0.1, x, 12.4, 5.2, false); box(of, MAT.head, 0.5, 0.25, 0.3, x, 13.7, 5.3, false); }   // floodlights
+  for (let i = 0; i < 7; i++) box(of, M.granite, 4.0, 0.2 * (i + 1), 0.44, -9, 0.1 * (i + 1), 6.22 + (6 - i) * 0.44);   // front steps
+  for (const x of [-10.9, -7.1]) of.add(new THREE.Mesh(tr(new THREE.CylinderGeometry(0.03, 0.03, 3.05, 6), x, 2.35, 7.75, -1.09), MAT.chrome));   // handrails up the steps
+  const pav = new THREE.Mesh(new THREE.PlaneGeometry(30, 12).rotateX(-Math.PI / 2).translate(0, 0.03, 12.2), new THREE.MeshLambertMaterial({ map: paverTex() }));
+  pav.material.map.repeat.set(10, 4); pav.receiveShadow = true; of.add(pav);
+  const suv = buildCar('#f1f1ee', 'suv').grp; suv.position.set(0.5, 0, 11); of.add(suv);
+  for (const [x, c] of [[6.5, '#1c1f24'], [8, '#b3202a']]){ const b = buildCar(c, 'bike', true).grp; b.position.set(x, 0, 11.5); b.rotation.y = 0.2; of.add(b); }
+  const palm = new THREE.Group();
+  palm.add(new THREE.Mesh(tr(new THREE.CylinderGeometry(0.16, 0.28, 7.5, 7), 0, 3.75, 0), lam(0x7a5a3a)));
+  palm.add(new THREE.Mesh(tr(palmLeaves(), 0, 1.0, 0), lam(0x3f8f3a, { flatShading: true, side: THREE.DoubleSide })));
+  palm.position.set(14.5, 0, 9); palm.traverse(o => { if (o.isMesh) o.castShadow = true; }); of.add(palm);
+  TPL.office = of;
+
+  // ---- toll plaza across our carriageway (local x = across the road, the approaching driver is on +z) ----
+  const tp = new THREE.Group();
+  const isl = [-5.4, -1.8, 1.8, 5.4];
+  for (const x of isl){
+    box(tp, M.concrete, 0.7, 0.25, 12, x, 0.125, 0, false);                  // slim islands: a 2.9 m lane between them
+    box(tp, M.yellow, 0.72, 0.26, 0.4, x, 0.13, 6, false); box(tp, M.yellow, 0.72, 0.26, 0.4, x, 0.13, -6, false);
+    box(tp, M.booth, 0.62, 2.2, 2.2, x, 1.35, 0.5);                          // booth
+    box(tp, M.red, 0.66, 0.25, 2.24, x, 2.5, 0.5, false);
+    box(tp, MAT.glass, 0.64, 0.8, 1.6, x, 1.7, 0.5, false);
+    box(tp, M.dark, 0.14, 1.1, 0.14, x + 0.3, 0.8, 3.2, false);                // boom post …
+    const arm = new THREE.Mesh(tr(new THREE.BoxGeometry(0.08, 3.0, 0.08), 0, 1.5, 0), M.red); arm.position.set(x + 0.3, 1.35, 3.2); arm.rotation.z = -0.2; tp.add(arm);   // … arm raised (FASTag)
+    box(tp, MAT.amber, 0.2, 0.2, 0.12, x, 2.9, 1.7, false);
+  }
+  for (const x of isl) box(tp, M.white, 0.45, 9.4, 0.45, x, 4.95, 0);        // canopy columns (standing on the islands)
+  box(tp, M.white, 17.5, 0.6, 10, 0, 9.9, 0);                                 // canopy roof, high enough for every camera
+  box(tp, M.red, 17.6, 0.18, 10.1, 0, 9.55, 0, false);
+  face(tp, nightLam(roadSignTex('board', 'TOLL PLAZA|FASTag lanes • slow to 40'), 0.25, 0.9), 12, 1.6, 0, 10.9, 5.02);
+  const under = nightLam(canvasTex(8, 8, (g) => { g.fillStyle = '#fff1c4'; g.fillRect(0, 0, 8, 8); }), 0.2, 1.1);
+  for (const x of [-3.6, 0, 3.6]){ const l = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 6).rotateX(Math.PI / 2).translate(x, 9.58, 0), under); tp.add(l); }
+  TPL.toll = tp;
+
+  // ---- police naka on the left shoulder (local +z faces the road) ----
+  const nk = new THREE.Group();
+  const jeep = buildCar('#f2f2ee', 'police').grp; jeep.position.set(0, 0, -1.2); jeep.rotation.y = Math.PI / 2; nk.add(jeep);
+  const cop1 = personStanding(M.khaki, M.khaki, M.beret); cop1.position.set(-2.2, 0, 2.6); cop1.rotation.y = 0.4; nk.add(cop1);
+  const cop2 = personStanding(M.khaki, M.khaki, M.beret); cop2.position.set(2.5, 0, 2.2); cop2.rotation.y = -0.3; nk.add(cop2);
+  const bar = canvasTex(256, 64, (g, w, h) => { for (let x = -h; x < w + h; x += 40){ g.fillStyle = '#f2c230'; g.fillRect(0, 0, w, h); } g.fillStyle = '#16171a'; for (let x = -h; x < w + h; x += 40){ g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 20, 0); g.lineTo(x + 20 + h, h); g.lineTo(x + h, h); g.fill(); }
+    g.fillStyle = '#fff'; g.fillRect(w / 2 - 70, 14, 140, 36); g.fillStyle = '#1b4fa0'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 28px ${FONT_B}`; g.fillText('POLICE', w / 2, 33); });
+  const barMat = new THREE.MeshLambertMaterial({ map: bar });
+  for (const x of [-4.5, 0.2, 4.9]){
+    const b = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 0.08), [M.dark, M.dark, M.dark, M.dark, barMat, barMat]); b.position.set(x, 0.85, 3.4); b.castShadow = true; nk.add(b);
+    box(nk, M.dark, 0.06, 0.9, 0.5, x - 0.8, 0.45, 3.4, false); box(nk, M.dark, 0.06, 0.9, 0.5, x + 0.8, 0.45, 3.4, false);
+  }
+  TPL.naka = nk;
+}
+
+/* ---------------- placing them along the road (chunk-owned, see buildChunk) ---------------- */
+const TOLL_EVERY = 50, TOLL_OFF = 24, NAKA_EVERY = 37, NAKA_OFF = 18;
+function isTollChunk(k){ return k > 2 && k % TOLL_EVERY === TOLL_OFF; }
+function tollS(k){ return k * CH + 30; }
+function isNakaChunk(k){ return k > 2 && k % NAKA_EVERY === NAKA_OFF && !isTollChunk(k) && !isPumpChunk(k) && k % 22 !== 5; }
+function nakaS(k){ return k * CH + 30; }
+// the unloading yard needs a clear left verge: slide it past any pump, dhaba, toll or naka
+function yardSpot(s){
+  const busy = (k) => isPumpChunk(k) || isTollChunk(k) || isNakaChunk(k) || k % 22 === 5;
+  for (let i = 0; i < 20; i++){ const k = Math.floor(s / CH); if (![-2, -1, 0, 1].some(d => busy(k + d))) return s; s += CH; }
+  return s;
+}
+function addOffice(grp){
+  const o = TPL.office.clone(), s = 36, l = -ROAD_HALF - 21;
+  placeOnRoad(o, s, l, groundH(s, l) + 0.02, Math.PI / 2); o.rotation.x = 0; o.rotation.z = 0; grp.add(o);
+}
+function addTollPlaza(grp, s){
+  const a = TPL.toll.clone(); placeOnRoad(a, s, 0, 0, 0); a.rotation.x = 0; a.rotation.z = 0; grp.add(a);
+  const b = TPL.toll.clone(); placeOnRoad(b, s, 17, 0, Math.PI); b.rotation.x = 0; b.rotation.z = 0; grp.add(b);   // the oncoming side
+}
+function addNaka(grp, s){
+  const n = TPL.naka.clone(), l = -ROAD_HALF - 4.2;
+  placeOnRoad(n, s, l, groundH(s, l) + 0.02, Math.PI / 2); n.rotation.x = 0; n.rotation.z = 0; grp.add(n);
+}
+function addRoadSign(grp, s, kind, text){                           // pole sign on the left verge, facing the traffic
+  const g = new THREE.Group(), M = placeMats();
+  const pole = new THREE.Mesh(tr(new THREE.CylinderGeometry(0.06, 0.06, kind === 'limit' ? 2.8 : 3.4, 6), 0, kind === 'limit' ? 1.4 : 1.7, 0), M.dark); g.add(pole);
+  const mat = new THREE.MeshLambertMaterial({ map: roadSignTex(kind, text), emissive: 0xffffff, emissiveMap: roadSignTex(kind, text), emissiveIntensity: 0.12 });
+  if (kind === 'limit') g.add(new THREE.Mesh(tr(new THREE.CircleGeometry(0.45, 24), 0, 2.9, 0.05), mat));
+  else { const b = new THREE.Mesh(tr(new THREE.PlaneGeometry(2.6, 1.3), 0, 3.6, 0.05), mat); g.add(b); }
+  placeOnRoad(g, s, -ROAD_HALF - 1.4, groundH(s, -8.4), 0.35); g.rotation.x = 0; g.rotation.z = 0; grp.add(g);
+}
+
+/* ---------------- unloading yard at the destination (placed per run, not per chunk) ---------------- */
+function removeYard(){ for (const o of PLACE.yard){ scene.remove(o); o.traverse(m => { if (m.isMesh && m.userData.own){ m.geometry.dispose(); if (m.material.map && m.userData.ownTex) m.material.map.dispose(); } }); } PLACE.yard = []; }
+function placeYard(s, dest, cargoHex){
+  removeYard();
+  const M = placeMats(), y = new THREE.Group();
+  const own = (geo, mat, shadow) => { const m = new THREE.Mesh(geo, mat); m.userData.own = true; if (shadow){ m.castShadow = true; m.receiveShadow = true; } y.add(m); return m; };
+  own(new THREE.PlaneGeometry(46, 34).rotateX(-Math.PI / 2).translate(0, 0.03, -4), M.dirt).receiveShadow = true;
+  own(new THREE.PlaneGeometry(14, 10).rotateX(-Math.PI / 2).translate(0, 0.035, 17), M.dirt).receiveShadow = true;   // apron out to the road
+  const wall = merge([tr(new THREE.BoxGeometry(17, 2.2, 0.35), -14.5, 1.1, 12.5), tr(new THREE.BoxGeometry(17, 2.2, 0.35), 14.5, 1.1, 12.5), tr(new THREE.BoxGeometry(0.35, 2.2, 34), -23, 1.1, -4.5), tr(new THREE.BoxGeometry(0.35, 2.2, 34), 23, 1.1, -4.5)]);
+  own(wall, M.cream, true);
+  own(merge([tr(new THREE.BoxGeometry(46.2, 0.3, 0.4), 0, 1.6, 12.52)]), lam(0x1f5fb0));
+  own(merge([tr(new THREE.BoxGeometry(0.9, 5.2, 0.9), -6, 2.6, 12.5), tr(new THREE.BoxGeometry(0.9, 5.2, 0.9), 6, 2.6, 12.5)]), M.white, true);   // gate pillars
+  const t = canvasTex(1024, 192, (g, w, h) => {
+    g.fillStyle = '#191F51'; g.fillRect(0, 0, w, h); g.fillStyle = '#f7931e'; g.fillRect(0, h - 16, w, 16);
+    drawLogo(g, 90, h / 2 - 6, 140); drawLogo(g, w - 90, h / 2 - 6, 140);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; fitText(g, 'UNLOADING POINT', w - 300, 70, 700, FONT_D); g.fillText('UNLOADING POINT', w / 2, 62);
+    g.fillStyle = '#ffd24a'; fitText(g, dest, w - 300, 58, 700, FONT_D); g.fillText(dest, w / 2, 132);
+  });
+  const sign = own(new THREE.PlaneGeometry(12.5, 2.3).translate(0, 6.3, 12.95), nightLam(t, 0.3, 0.9)); sign.userData.ownTex = true;
+  own(new THREE.BoxGeometry(12.9, 2.6, 0.3).translate(0, 6.3, 12.75), M.dark);
+  const arm = own(new THREE.BoxGeometry(0.1, 5.5, 0.1).translate(0, 2.75, 0), M.red); arm.position.set(-5.4, 1.1, 13.2); arm.rotation.z = -0.25;   // barrier raised
+  const heapMat = cargoHex ? cargoMat(cargoHex) : MAT.sand;
+  for (const [x, z, a, b, c] of [[-12, -8, 6.5, 4.5, 5.5], [2, -13, 7.5, 5.2, 6], [13, -6, 5.5, 3.8, 5]]) own(heapGeo(a, b, c, 0.25).translate(x, 0, z), heapMat, true);
+  const L = own(merge([tr(new THREE.BoxGeometry(2.4, 1.2, 3.4), 0, 1.2, 0), tr(new THREE.BoxGeometry(1.8, 1.4, 1.6), 0, 2.4, 0.6), tr(new THREE.BoxGeometry(0.3, 0.3, 2.6), 0.8, 1.6, -2.3, 0.5), tr(new THREE.BoxGeometry(0.3, 0.3, 2.6), -0.8, 1.6, -2.3, 0.5), tr(new THREE.BoxGeometry(2.6, 0.9, 0.9), 0, 0.8, -3.6)]), M.loader, true);
+  L.position.set(-3, 0, -3); L.rotation.y = 0.6;                            // yellow loader
+  own(merge([tr(new THREE.CylinderGeometry(0.62, 0.62, 0.5, 14), 1.25, 0.62, 1.1, 0, 0, Math.PI / 2), tr(new THREE.CylinderGeometry(0.62, 0.62, 0.5, 14), -1.25, 0.62, 1.1, 0, 0, Math.PI / 2), tr(new THREE.CylinderGeometry(0.62, 0.62, 0.5, 14), 1.25, 0.62, -1.1, 0, 0, Math.PI / 2), tr(new THREE.CylinderGeometry(0.62, 0.62, 0.5, 14), -1.25, 0.62, -1.1, 0, 0, Math.PI / 2)]), M.dark).position.copy(L.position);
+  y.children[y.children.length - 1].rotation.y = 0.6;
+  own(new THREE.BoxGeometry(3.4, 0.25, 13).translate(-16, 0.12, 2), M.concrete, true);   // weighbridge …
+  own(new THREE.BoxGeometry(2.4, 2.6, 2.4).translate(-19.8, 1.3, 7), M.white, true);      // … and its cabin
+  own(new THREE.BoxGeometry(0.12, 9, 0.12).translate(18, 4.5, 8), M.dark); own(new THREE.BoxGeometry(1.2, 0.3, 0.5).translate(18, 9, 8.2), MAT.head);
+  const w1 = personStanding(M.orange || (M.orange = lam(0xf28c1c)), M.navyPants || (M.navyPants = lam(0x3a3f4a)), M.yellow);   // yard supervisor in a hard hat
+  w1.traverse(o => { if (o.isMesh) o.userData.own = true; }); w1.position.set(4, 0, 9); w1.rotation.y = 2.6; y.add(w1);
+  const yl = -ROAD_HALF - 19;
+  placeOnRoad(y, s, yl, groundH(s, yl) + 0.02, Math.PI / 2); y.rotation.x = 0; y.rotation.z = 0; scene.add(y); PLACE.yard.push(y);
+  // painted bay on the road where the truck stops, and a board 180 m before
+  const bay = canvasTex(256, 512, (g, w, h) => { g.clearRect(0, 0, w, h); g.strokeStyle = '#f2c230'; g.lineWidth = 14; g.strokeRect(8, 8, w - 16, h - 16);
+    g.fillStyle = '#f2c230'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.save(); g.translate(w / 2, h / 2); g.rotate(-Math.PI / 2); g.font = `800 76px ${FONT_D}`; g.fillText('UNLOAD', 0, 0); g.restore(); });
+  const bm = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 14).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: bay, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  bm.userData.own = true; bm.userData.ownTex = true;
+  const bg = new THREE.Group(); bg.add(bm); placeOnRoad(bg, s, LANES[0], 0.03, 0); bg.rotation.x = 0; bg.rotation.z = 0; scene.add(bg); PLACE.yard.push(bg);
+  const sg = new THREE.Group(); addRoadSign(sg, s - 180, 'board', 'UNLOADING POINT|180 m on the left'); scene.add(sg); PLACE.yard.push(sg);
+}
+
+/* ---------------- electric poles along the left verge ---------------- */
+function makePlacePools(){
+  POOLS.epole = new Pool([{ geo: merge([tr(new THREE.BoxGeometry(0.22, 9, 0.22), 0, 4.5, 0), tr(new THREE.BoxGeometry(2.0, 0.14, 0.14), 0, 8.4, 0)]), mat: lam(0x9a9790) },
+    { geo: merge([tr(new THREE.CylinderGeometry(0.06, 0.08, 0.28, 6), -0.85, 8.6, 0), tr(new THREE.CylinderGeometry(0.06, 0.08, 0.28, 6), 0, 8.6, 0), tr(new THREE.CylinderGeometry(0.06, 0.08, 0.28, 6), 0.85, 8.6, 0)]), mat: lam(0x7d5a3a) }], 260, { cast: true });
+}
+
+/* =================================================================
    LEVELS  — 30 levels in 6 tiers, Beginner → Pro Max
    ================================================================= */
 const TIERS = [['BEGINNER', 'Learn the road'], ['EASY', 'Light traffic'], ['MEDIUM', 'Busier lanes'],
@@ -2725,6 +3063,7 @@ const IN = { left: false, right: false, gas: false, brake: false, horn: false, w
 let PL = null;
 function paintFor(id){ return G.paints[id] || TRUCKS[id].cab; }
 function conductorFor(id){ const c = G.conductors[id]; return CONDUCTORS[c] ? c : CONDUCTOR_DEFAULT[id] || 'raju'; }
+function tripItem(){ return ROUTES[G.route].item || 'COAL'; }
 function buildPlayer(){
   if (cockpit.parent) cockpit.parent.remove(cockpit);         // the cabin interior is reused, never disposed
   if (PL){
@@ -2733,8 +3072,8 @@ function buildPlayer(){
     if (PL.brakeMat) PL.brakeMat.dispose();
     for (const m of PL.clipMats) m.dispose();
   }
-  const rt = ROUTES[G.route];                                   // Daman routes load the truck with that route's item
-  PL = buildTruck(G.truckId, paintFor(G.truckId), TRUCKS[G.truckId].body, rt.item ? CARGO[rt.item] : null);
+  // Daman routes load the truck with that route's item; the other routes haul coal (there is always something to unload)
+  PL = buildTruck(G.truckId, paintFor(G.truckId), TRUCKS[G.truckId].body, CARGO[tripItem()]);
   PL.brakeMat = MAT.tail.clone();
   // cut-away plane: the upright-phone cabin camera sits behind the cab, so everything of this truck behind
   // the cab's back wall is clipped away while that camera is on (the plane is parked far away otherwise).
@@ -2750,6 +3089,8 @@ function buildPlayer(){
     o.material = own.get(o.material);
   });
   PL.clipMats = [...own.values()];
+  PL.cargoMeshes = [];                                           // the load, shrunk away while unloading
+  PL.grp.traverse(o => { if (o.isMesh && /^(cargo:|cement|sack)/.test(o.userData.matKey || '')){ o.geometry.computeBoundingBox(); o.userData.baseY = o.geometry.boundingBox.min.y; PL.cargoMeshes.push(o); } });
   cockpit.position.set(0, 0, -PL.L / 2); PL.grp.add(cockpit);   // cab front is at z = -L/2 on every truck
   buildCrew(conductorFor(G.truckId));
   scene.add(PL.grp);
@@ -2854,14 +3195,17 @@ function spawnTrafficAt(s){
   const cands = LANES.filter(l => !near.some(t => Math.abs(t.s - s) < 24 && Math.abs(t.tl - l) < 1.6))
     .filter(l => { const b = new Set(busy); b.add(laneIndex(l)); return b.size < 3; });   // always leave one lane open
   if (!cands.length) return;
-  const lane = pick(cands);
-  if (Math.random() < C.works){
+  const tk = tollNearK(s);
+  if (tk >= 0 && Math.abs(tollS(tk) - s) < 16) return;           // nothing spawns inside the toll booths
+  const tpl = pickTemplate();
+  const lane = tpl.kind === 'bike' && cands.includes(LANES[0]) && Math.random() < 0.75 ? LANES[0] : pick(cands);   // bikes keep left
+  if (Math.random() < C.works && tpl.kind !== 'bike'){
     const g = WORKS_TPL.grp.clone(); scene.add(g);
     traffic.push({ grp: g, axles: [], L: WORKS_TPL.L, W: WORKS_TPL.W, kind: 'works', s, l: lane, tl: lane, v: 0, vBase: 0, passed: false, dead: 0, lcT: 99, fixed: true });
     return;
   }
-  const tpl = pickTemplate(), v = cloneVehicle(tpl);
-  const kmh = rand(C.tMin, C.tMax) * (tpl.kind === 'car' ? 1.15 : tpl.kind === 'bus' ? 0.95 : 0.85);
+  const v = cloneVehicle(tpl);
+  const kmh = rand(C.tMin, C.tMax) * (tpl.kind === 'car' ? 1.15 : tpl.kind === 'bus' ? 0.95 : tpl.kind === 'bike' ? 0.78 : 0.85);
   scene.add(v.grp);
   traffic.push(Object.assign(v, { s, l: lane, tl: lane, v: kmh / 3.6, vBase: kmh / 3.6, passed: false, dead: 0, lcT: rand(2, 6), fixed: false }));
 }
@@ -2883,8 +3227,12 @@ function updateTraffic(dt){
         const ds = o.s - t.s;
         if (ds > 0 && ds < (o.L + t.L) / 2 + 11 && Math.abs(o.l - t.l) < 2.4) want = Math.min(want, o.v * 0.92);
       }
+      const tk = tollNearK(t.s), dT = tk >= 0 ? tollS(tk) - t.s : 1e9;
+      const atToll = dT < 90 && dT > -12;
+      if (atToll) want = Math.min(want, (dT > 30 ? 45 : 30) / 3.6);   // everyone slows through the plaza
       t.v += clamp(want - t.v, -7 * dt, 2 * dt);
       t.lcT -= dt;
+      if (atToll) t.lcT = Math.max(t.lcT, 1);                     // … and keeps to its toll lane
       if (t.lcT <= 0){
         t.lcT = rand(3, 7);
         if (Math.random() < C.lane){
@@ -2953,6 +3301,7 @@ function steerInput(){
 }
 function topSpeed(){ return (TRUCKS[G.truckId].top * G.cfg.topMul * upgMul('eng') + (G.boostT > 0 ? 45 : 0)) / 3.6; }
 function updatePlayer(dt){
+  if (G.parking){ updateParking(dt); return; }                 // the truck pulls into the unloading bay on its own
   const T = TRUCKS[G.truckId], top = topSpeed();
   let gas = IN.gas || (G.autoGas && !IN.brake);
   const brake = IN.brake;
@@ -2982,6 +3331,7 @@ function updatePlayer(dt){
       _col.set(0xffc060); emit(_ex.x, _ex.y, _ex.z, rand(-2, 2), rand(1, 3), rand(-2, 2), 0.3, 0.25, 0.1, 1, _col, 1, -9);
     }
   }
+  G.l = tollAssist(G.l, dt);
   const ds = G.v * dt; G.s += ds; G.score += ds * 0.1;
   G.fuel = Math.max(0, G.fuel - ds / (G.cfg.kmTank * 1000) * (0.55 + 0.7 * G.throttle) * upgMul('tank'));
   G.boostT = Math.max(0, G.boostT - dt); G.inv = Math.max(0, G.inv - dt);
@@ -3221,6 +3571,7 @@ function ensureWorld(){
 }
 function parkTruck(){
   clearTraffic();
+  G.unloadS = -1; G.parking = 0; removeYard(); resetCargo();       // parked outside the Daman office, fully loaded
   G.s = G.s0 = 40; G.l = 0; G.v = 0; G.vl = 0; G.steer = 0; G.yaw = 0; G.roll = 0; G.pitch = 0;
   ensureWorld(); updateChunks(G.s, true);
   placeOnRoad(PL.grp, G.s, G.l, 0);
@@ -3233,7 +3584,14 @@ function startRun(n, endless){
   ensureWorld();
   Object.assign(G, { s: 40, s0: 40, l: 0, v: 0, vl: 0, steer: 0, yaw: 0, roll: 0, pitch: 0, throttle: 0, fuel: 1, hearts: 3, inv: 0, boostT: 0,
     coins: 0, near: 0, smash: 0, score: 0, time: 0, shake: 0, outFuelT: 0, emitAcc: 0, dustAcc: 0, hours: TOD_START[G.tod],
-    pumpWarned: -1, pumpUsed: -1, combo: 0, comboT: -9, comboMax: 0, nearCash: 0, pumps: 0 });
+    pumpWarned: -1, pumpUsed: -1, combo: 0, comboT: -9, comboMax: 0, nearCash: 0, pumps: 0,
+    parking: 0, unloadT: 0, tolls: 0, fines: 0, tollPaid: -1, tollWarned: -1, nakaPassed: -1, nakaWarned: -1 });
+  // the trip ends at an unloading yard on the left, exactly `target` metres from the office
+  G.unloadS = G.endless ? -1 : yardSpot(G.s0 + G.cfg.target);
+  if (!G.endless) G.cfg.target = G.unloadS - G.s0;
+  if (G.unloadS > 0) placeYard(G.unloadS, (R.to || (R.cities && R.cities[0]) || 'DAMAN DEPOT').toUpperCase(), G.truckId !== 'tank' ? CARGO[tripItem()].hex : null);
+  else removeYard();
+  resetCargo();
   updateChunks(G.s, true);
   G.spawnAt = G.s + 90; G.itemAt = G.s + 60; G.oncAt = G.s + 30;
   while (G.spawnAt < G.s + 330){ spawnTrafficAt(G.spawnAt); G.spawnAt += G.cfg.gap * rand(0.6, 1.4); }
@@ -3253,11 +3611,12 @@ function updatePlay(dt){
   while (G.oncAt < G.s + 450){ spawnOncoming(G.oncAt); G.oncAt += rand(45, 110); }
   updateTraffic(dt); updateOncoming(dt); updateItems(dt);
   updatePumps();
-  checkCollisions();
+  updatePlaces(G.time);
+  if (!G.parking){ checkCollisions(); checkPlaces(); }
   if (G.mode !== 'play') return;
-  if (G.fuel <= 0){ G.outFuelT += dt; if (G.v < 0.6 && G.outFuelT > 1.5){ endRun(false, 'The tank ran dry. Collect fuel cans on the road.'); return; } }
+  if (G.fuel <= 0 && !G.parking){ G.outFuelT += dt; if (G.v < 0.6 && G.outFuelT > 1.5){ endRun(false, 'The tank ran dry. Collect fuel cans on the road.'); return; } }
   else G.outFuelT = 0;
-  if (!G.endless && G.s - G.s0 >= G.cfg.target) endRun(true);
+  if (!G.endless && !G.parking && G.cfg.target - (G.s - G.s0) < 110) startParking();   // the unloading yard is just ahead
   emitTruckFx(dt);
   updateChunks(G.s);
 }
@@ -3271,6 +3630,77 @@ function updatePumps(){
     const add = Math.min(1 - G.fuel, 0.6);
     G.fuel += add; G.score += 20; G.pumps++; sfx.pickup();
     toast(`REFUELLED +${Math.round(add * 100)}% at ${pump[0]}${pump[2] ? ` • ₹${pump[2].toFixed(2)}/L` : ''}`, 'good');
+  }
+}
+// ---- end of the trip: pull into the painted bay in the left lane, then the load comes off ----
+function resetCargo(){ if (PL && PL.cargoMeshes) for (const m of PL.cargoMeshes){ m.scale.y = 1; m.position.y = 0; m.visible = true; } }
+function startParking(){
+  G.parking = 1; G.unloadT = 0; G.boostT = 0;
+  for (let i = traffic.length - 1; i >= 0; i--){ const t = traffic[i]; if (t.s > G.s - 12 && t.s < G.unloadS + 60 && t.l < 2) removeFrom(traffic, i); }   // clear the bay
+  toast('Unloading point ahead — pulling in', 'sky');
+}
+function updateParking(dt){
+  const rem = G.unloadS - G.s;
+  if (G.parking === 1){
+    const vt = Math.sqrt(2 * 2.4 * Math.max(0, rem));              // brake smoothly to a stop on the bay
+    G.v = G.v > vt ? Math.max(vt, G.v - 9 * dt) : Math.min(vt, G.v + 2.5 * dt, 14);
+    if (rem < 0.4 || (rem < 3 && G.v < 0.4)){ G.v = 0; G.parking = 2; G.unloadT = 0; sfx.airBrake(); toast('UNLOADING…', 'amber'); }
+  } else {
+    G.v = 0; G.unloadT += dt;
+    const k = clamp((G.unloadT - 0.5) / 2.2, 0, 1);
+    for (const m of PL.cargoMeshes){ m.scale.y = Math.max(0.03, 1 - k); m.position.y = m.userData.baseY * (1 - m.scale.y); m.visible = k < 0.98; }
+    G.dustAcc += dt;
+    if (k > 0 && k < 1 && G.dustAcc > 0.14){                      // the load pours out on the yard side
+      G.dustAcc = 0; _ex.set(-PL.W / 2 - 0.6, 1.4, rand(-PL.L * 0.3, PL.L * 0.35)).applyMatrix4(PL.grp.matrixWorld);
+      burst(_ex.x, _ex.y, _ex.z, 5, CARGO[tripItem()].dust || 0xb09a78, 1.6);
+    }
+    if (G.unloadT > 3.3){ endRun(true); return; }
+  }
+  const ds = G.v * dt; G.s += ds; G.score += ds * 0.1;
+  const l0 = G.l; G.l = lerp(G.l, LANES[0], damp(1.3, dt)); G.vl = (G.l - l0) / Math.max(dt, 1e-4);
+  G.steer = lerp(G.steer, clamp(G.vl * 0.4, -1, 1), damp(5, dt));
+  G.throttle = lerp(G.throttle, 0, damp(4, dt)); G.acc = 0; G.braking = true;
+  G.yaw = lerp(G.yaw, -Math.atan2(G.vl, Math.max(G.v, 4)) * 0.9, damp(8, dt));
+  G.roll = lerp(G.roll, 0, damp(4, dt)); G.pitch = lerp(G.pitch, G.parking === 1 && G.v > 1 ? 0.01 : 0, damp(3, dt)); G.bounce = 0;
+  placeOnRoad(PL.grp, G.s, G.l, 0, G.yaw, G.roll, G.pitch);
+  for (const ax of PL.axles){ ax.rotation.x -= G.v * dt / ax.userData.r; if (ax.userData.steer) ax.rotation.y = -G.steer * 0.4; }
+  PL.grp.visible = true;
+  PL.brakeMat.emissiveIntensity = 4;
+}
+
+// ---- toll plazas (FASTag, guided into a lane) and police nakas (speed check) ----
+const TOLL_FEE = { '14': 40, '16': 50, '18': 60, tank: 50 }, TOLL_FAST = 50, NAKA_LIMIT = 80, NAKA_FINE = 200, TOLL_FINE = 50;
+function tollNearK(s){ const k = TOLL_OFF + TOLL_EVERY * Math.round((s / CH - 0.5 - TOLL_OFF) / TOLL_EVERY); return isTollChunk(k) ? k : -1; }
+function nakaNearK(s){ const k = NAKA_OFF + NAKA_EVERY * Math.round((s / CH - 0.5 - NAKA_OFF) / NAKA_EVERY); return isNakaChunk(k) ? k : -1; }
+function tollAssist(l, dt){                                         // the lanes between the booths are narrow: ease into the nearest one
+  const k = tollNearK(G.s); if (k < 0) return l;
+  const ds = tollS(k) - G.s; if (ds > 55 || ds < -9) return l;
+  const lane = LANES.reduce((a, b) => Math.abs(b - l) < Math.abs(a - l) ? b : a);
+  return lerp(l, lane, damp(ds < 14 ? 9 : 1 + (55 - ds) / 12, dt));
+}
+function checkPlaces(){
+  const kmh = G.v * 3.6, beyond = (s) => G.unloadS > 0 && s > G.unloadS;   // past the yard: this trip never gets there
+  const tk = tollNearK(G.s);
+  if (tk >= 0 && !beyond(tollS(tk))){
+    const ds = tollS(tk) - G.s;
+    if (ds < 230 && ds > 60 && G.tollWarned !== tk){ G.tollWarned = tk; toast('Toll plaza ahead — slow to 40', 'amber'); }
+    if (ds < 0 && G.tollPaid !== tk){
+      G.tollPaid = tk;
+      const fee = TOLL_FEE[G.truckId] || 50, fine = kmh > TOLL_FAST ? TOLL_FINE : 0;
+      G.tolls += fee; G.fines += fine; sfx.beep();
+      toast(fine ? `Too fast through the toll! FASTag −₹${fee} • fine −₹${fine}` : `FASTag paid −₹${fee} • have a safe trip`, fine ? 'bad' : 'sky');
+      if (fine) flashRed();
+    }
+  }
+  const nk = nakaNearK(G.s);
+  if (nk >= 0 && !beyond(nakaS(nk))){
+    const ds = nakaS(nk) - G.s;
+    if (ds < 200 && ds > 40 && G.nakaWarned !== nk){ G.nakaWarned = nk; toast(`👮 Police checkpoint ahead — limit ${NAKA_LIMIT} km/h`, 'amber'); }
+    if (ds < 2 && G.nakaPassed !== nk){
+      G.nakaPassed = nk;
+      if (kmh > NAKA_LIMIT){ G.fines += NAKA_FINE; sfx.siren(); flashRed(); toast(`🚨 POLICE CHALLAN — ${Math.round(kmh)} km/h in a ${NAKA_LIMIT} zone −₹${NAKA_FINE}`, 'bad'); }
+      else toast('👮 Police checkpoint — all papers OK, go ahead', 'good');
+    }
   }
 }
 function endRun(ok, reason){
@@ -3682,7 +4112,9 @@ function rwOnRunEnd(ok, dist, stars){
     if (m.prog >= m.n){ m.done = true; e.missions += m.pay; e.done.push(m); }
   }
   store.set('missions', ms);
-  e.total = e.coins + e.near + e.smash + e.pay + e.km + e.missions;
+  const gross = e.coins + e.near + e.smash + e.pay + e.km + e.missions;
+  e.fees = Math.min(gross, (G.tolls || 0) + (G.fines || 0));         // FASTag tolls + police challans come off the pay
+  e.total = gross - e.fees;
   bankAdd(e.total);
   return e;
 }
@@ -3762,6 +4194,7 @@ function renderResultGoal(){
 function renderResultRewards(rw){
   const rows = [['Coins', rw.coins], ['Close calls', rw.near], ['Smashed', rw.smash], ['Delivery fare', rw.pay], ['Distance pay', rw.km], ['Missions', rw.missions]].filter(r => r[1] > 0);
   $('resEarn').innerHTML = rows.map(([k, v]) => `<span>${k}</span><b>+${rupees(v)}</b>`).join('')
+    + (rw.fees > 0 ? `<span>Toll &amp; challan</span><b class="neg">−${rupees(rw.fees)}</b>` : '')
     + `<span class="tot">Bank</span><b class="tot">${rupees(RW.bank)}</b>`;
   const ms = RW.ms ? RW.ms.list : [];
   $('resMissions').innerHTML = ms.map(m => `<li class="${m.done ? 'done' : ''}${rw.done.includes(m) ? ' new' : ''}"><span>${m.done ? '✓' : '•'} ${missionText(m)}</span><b>${rw.done.includes(m) ? '+' + rupees(m.pay) : m.done ? 'done' : missionProg(m)}</b></li>`).join('');
@@ -3818,6 +4251,13 @@ const sfx = (() => {
     boost(){ tone(200, 1200, 0.5, 'sawtooth', 0.1); },
     crash(k){ noise(0.5 * k + 0.2, 900, 0.6 * k, 'lowpass'); tone(120, 40, 0.4, 'square', 0.18 * k); },
     airBrake(){ noise(0.45, 2600, 0.12, 'highpass'); },
+    beep(){ tone(1760, 1760, 0.1, 'square', 0.05); setTimeout(() => tone(2090, 2090, 0.14, 'square', 0.05), 150); },   // FASTag reader
+    siren(){                                                     // police wail, two seconds
+      if (!ctx) return; const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sawtooth';
+      for (let i = 0; i < 4; i++){ o.frequency.setValueAtTime(680, t + i * 0.5); o.frequency.linearRampToValueAtTime(1250, t + i * 0.5 + 0.25); o.frequency.linearRampToValueAtTime(680, t + i * 0.5 + 0.5); }
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t + 0.06); g.gain.setValueAtTime(0.07, t + 1.8); g.gain.exponentialRampToValueAtTime(0.001, t + 2.1);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + 2.2);
+    },
     win(){ [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, f * 1.01, 0.28, 'triangle', 0.18), i * 120)); },
   };
 })();
@@ -4343,7 +4783,7 @@ if (location.hostname === 'localhost'){
     state(){ return { mode: G.mode, kmh: Math.round(G.v * 3.6), s: Math.round(G.s - G.s0), l: +G.l.toFixed(2), fuel: +G.fuel.toFixed(3), hearts: G.hearts,
       coins: G.coins, traffic: traffic.length, onc: oncoming.length, items: items.length, chunks: chunks.size, night: +G.night.toFixed(2), hours: +G.hours.toFixed(2),
       calls: renderer.info.render.calls, tris: renderer.info.render.triangles, parts: pGeo.drawRange.count }; },
-    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); }, closeCall(){ G.near++; rwCloseCall(); }, orbit(a){ CAM.orbit = a; }, camInfo(){ return { pos: camera.position.toArray().map(v => +v.toFixed(2)), look: CAM.look.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), near: camera.near, view: camera.view && camera.view.enabled ? [camera.view.offsetX, camera.view.offsetY] : null, dx: CAM.dx, dy: CAM.dy, shift: viewShift.slice(), aspect: +camera.aspect.toFixed(3) }; },
+    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, get(k){ return G[k]; }, cam(i){ setCam(i); }, closeCall(){ G.near++; rwCloseCall(); }, orbit(a){ CAM.orbit = a; }, camInfo(){ return { pos: camera.position.toArray().map(v => +v.toFixed(2)), look: CAM.look.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), near: camera.near, view: camera.view && camera.view.enabled ? [camera.view.offsetX, camera.view.offsetY] : null, dx: CAM.dx, dy: CAM.dy, shift: viewShift.slice(), aspect: +camera.aspect.toFixed(3) }; },
     music(){ const it = curItem(); return { playing: MUSIC.playing, idx: MUSIC.idx, song: it && it.name, songs: musicList().length, yt: YTP.loaded, ytState: YTP.state, ytReady: YTP.ready, tv: !$('ytDock').hidden }; }
   };
 }
@@ -4351,7 +4791,7 @@ if (location.hostname === 'localhost'){
 /* =================================================================
    BOOT
    ================================================================= */
-makePools(); makeTemplates(); makeTrafficTemplates(); makeWorksTemplate(); makeItems(); makeCockpit(); loadMySongs();
+makePools(); makeTemplates(); makeTrafficTemplates(); makeWorksTemplate(); makePlaceTemplates(); makeItems(); makeCockpit(); loadMySongs();
 buildPlayer();
 applyGfx();
 parkTruck();
