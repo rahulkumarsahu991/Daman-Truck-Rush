@@ -221,6 +221,73 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
 .av b{position:absolute;left:50%;top:.34em;width:.92em;height:1.05em;margin-left:-.46em;border-radius:48% 48% 44% 44%;background:var(--sk);border-top:.3em solid var(--tp)}
 .av.beard b{box-shadow:inset 0 -.28em 0 var(--bd)}
 .av.none{display:grid;place-items:center;background:#2a3470;color:var(--muted);font-style:normal}
+/* ---------- rewards: bank chips, today's missions, upgrade shop, daily reward, combo pop ---------- */
+.home-chips{position:absolute;top:calc(var(--sat) + .8em);right:calc(var(--sar) + .9em);display:flex;gap:.45em;z-index:2}
+@media (orientation: portrait){ .home-chips{position:static;justify-content:flex-end;margin-bottom:-.2em} }
+.chip{display:flex;align-items:center;gap:.4em;padding:.35em .75em .25em;border-radius:2em;background:var(--panel);border:1px solid var(--line);font:600 1.3em/1 'Teko',sans-serif;letter-spacing:.04em}
+.chip.bank{border-color:rgba(247,147,30,.6)}
+.chip.bank i{font:700 .55em/1 'Hind',sans-serif;letter-spacing:.14em;color:var(--muted);font-style:normal}
+.chip.bank b{color:var(--amber-2);font-variant-numeric:tabular-nums}
+.chip.streak{color:#ffcf4a}
+.home-ms{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:.8em;padding:.6em .8em;display:grid;gap:.45em;width:min(24em,100%);margin:0 auto .8em}
+.home-ms h3{margin:0;display:flex;justify-content:space-between;align-items:baseline;font:600 1.3em/1 'Teko',sans-serif;letter-spacing:.06em;color:var(--amber-2)}
+.home-ms h3 small{font:600 .6em 'Hind',sans-serif;color:var(--muted);letter-spacing:.04em}
+.hm{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.2em .6em;font-size:.88em;align-items:center}
+.hm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm b{font:600 1.15em/1 'Teko',sans-serif;color:#ffcf4a}
+.hm i{height:.35em;border-radius:1em;background:rgba(255,255,255,.1);overflow:hidden}
+.hm i em{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--amber-2))}
+.hm small{font-size:.8em;color:var(--muted);font-variant-numeric:tabular-nums}
+.hm.done{opacity:.75} .hm.done b{color:var(--good)} .hm.done i em{background:var(--good)}
+.btn.upg{position:relative}
+.btn.upg.can::after{content:'';position:absolute;top:-.2em;right:-.2em;width:.6em;height:.6em;border-radius:50%;background:#ff4b3e;box-shadow:0 0 0 .15em var(--panel-2);animation:dotPulse 1s ease-in-out infinite alternate}
+@keyframes dotPulse{to{transform:scale(1.35)}}
+.g-upg{font-size:1.25em;justify-self:stretch;display:flex;justify-content:center;gap:.5em;align-items:baseline}
+.g-upg b{color:var(--amber-2)}
+#upgrades,#daily{z-index:42}
+.u-bank{margin:0;color:var(--muted)} .u-bank b{color:var(--amber-2);font:600 1.4em 'Teko',sans-serif}
+.upg-list{list-style:none;margin:0;padding:0;display:grid;gap:.5em}
+.upg-list li{display:flex;align-items:center;gap:.7em;padding:.55em .7em;border-radius:.6em;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.u-txt{flex:1;min-width:0;display:grid;gap:.25em}
+.u-txt b{font:600 1.35em/1 'Teko',sans-serif;letter-spacing:.04em}
+.u-txt b small{font:600 .6em 'Hind',sans-serif;color:var(--muted);margin-left:.3em;letter-spacing:0}
+.u-txt span{font-size:.8em;color:var(--muted)}
+.pips{display:flex;gap:.25em}
+.pips em{width:1.4em;height:.4em;border-radius:.2em;background:rgba(255,255,255,.14)}
+.pips em.on{background:linear-gradient(90deg,var(--amber),var(--amber-2))}
+.u-buy{font-size:1.25em;padding:.4em .75em .3em;display:grid;justify-items:center;min-width:5.2em}
+.u-buy small{font:600 .5em 'Hind',sans-serif;letter-spacing:0;text-transform:none;opacity:.85}
+.u-buy.short{background:var(--panel);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.u-buy:disabled{opacity:.6}
+.u-buy.nope{animation:nope .35s}
+@keyframes nope{25%{transform:translateX(-.3em)}75%{transform:translateX(.3em)}}
+.daily-card{text-align:center;justify-items:center}
+.d-streak{margin:0;color:#ffcf4a;font-weight:600}
+.d-days{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,1fr);gap:.3em;width:100%}
+.d-days li{display:grid;gap:.15em;padding:.45em .1em;border-radius:.5em;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.d-days small{font-size:.62em;color:var(--muted)}
+.d-days b{font:600 1em/1 'Teko',sans-serif;letter-spacing:.02em}
+.d-days li.got{opacity:.55} .d-days li.got b::after{content:' ✓';color:var(--good)}
+.d-days li.now{background:rgba(247,147,30,.2);border-color:var(--amber);transform:scale(1.08)}
+.d-days li.now b{color:var(--amber-2);font-size:1.15em}
+.res-earn{display:grid;grid-template-columns:1fr auto;gap:.2em .8em;padding:.5em .7em;border-radius:.6em;background:rgba(255,255,255,.04);font-size:.9em}
+.res-earn span{color:var(--muted)} .res-earn b{color:#ffcf4a;font-variant-numeric:tabular-nums;text-align:right}
+.res-earn .tot{border-top:1px solid var(--line);padding-top:.3em;margin-top:.1em;color:var(--text);font-weight:700}
+.res-earn b.tot{color:var(--amber-2);font:600 1.35em/1 'Teko',sans-serif}
+.res-ms{list-style:none;margin:0;padding:0;display:grid;gap:.2em;font-size:.82em}
+.res-ms li{display:flex;justify-content:space-between;gap:.6em;color:var(--muted)}
+.res-ms li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-ms li.done{color:var(--good)} .res-ms li.new{color:#fff;font-weight:700} .res-ms li.new b{color:var(--good)}
+.res-goal{margin:0;text-align:center;color:var(--text);font-size:.92em} .res-goal b{color:var(--amber-2)}
+#rNext .cd{display:inline-grid;place-items:center;width:1.3em;height:1.3em;margin-left:.3em;border-radius:50%;background:rgba(0,0,0,.25);font-size:.8em;vertical-align:.08em}
+/* close-call combo pop: brief, text only, just above the truck */
+#pop{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);font:600 2.2em/1 'Teko',sans-serif;letter-spacing:.05em;white-space:nowrap;
+  color:#ffcf4a;text-shadow:0 .06em .25em rgba(0,0,0,.9),0 0 .6em rgba(0,0,0,.5);opacity:0;pointer-events:none}
+#pop.show{animation:popIn 1.05s ease-out forwards}
+#pop.lv2{color:#ffe08a} #pop.lv3{color:#7cf0a6;font-size:2.5em} #pop.lv4{color:#7cc4ff;font-size:2.8em} #pop.lv5{color:#ff7ad9;font-size:3.1em}
+@keyframes popIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(1)}}
+@media (orientation: landscape){ #pop{top:44%} }
+@media (prefers-reduced-motion: reduce){ #pop.show{animation:none;opacity:1} .btn.upg.can::after{animation:none} }
 /* song list */
 .music-card{gap:.7em}
 .m-head{display:flex;align-items:center;gap:.7em}
@@ -468,10 +535,13 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     </div>
     <div class="hop">HORN <i>OK</i> PLEASE</div>
   </div>
+  <div class="home-chips"><span id="streakChip" class="chip streak" hidden></span><span class="chip bank" title="Your bank"><i>BANK</i><b id="bankChip">₹0</b></span></div>
   <div class="home-bottom">
+    <div id="homeMissions" class="home-ms"></div>
     <div class="menu-btns">
       <button id="btnPlay" class="btn big">Play</button>
       <div class="menu-row">
+        <button id="btnUpg" class="btn ghost upg">Upgrade</button>
         <button id="btnSettings" class="btn ghost">Settings</button>
         <button id="btnMusic" class="btn ghost">Music</button>
         <button id="btnFull" class="btn ghost">Fullscreen</button>
@@ -497,6 +567,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     <div id="gStats" class="stats"></div>
     <div id="gColors" class="swatches"></div>
     <div id="gCrew" class="crew-pick" role="group" aria-label="Conductor for this truck"></div>
+    <button id="gUpg" class="btn ghost upg g-upg">⚡ Upgrade truck <b id="gBank">₹0</b></button>
   </div>
   <footer class="scr-foot"><button class="btn big" data-go="routes">Next: Route</button></footer>
 </section>
@@ -589,6 +660,7 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
     </div>
   </aside>
   <div id="toast"></div>
+  <div id="pop" aria-live="polite"></div>
   <div id="warn" hidden></div>
   <div id="flash"></div>
 </div>
@@ -672,6 +744,26 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
   </div>
 </div>
 
+<div id="upgrades" class="modal" hidden>
+  <div class="card upg-card">
+    <div class="m-head"><img class="mini-logo" data-logo alt=""><div><h2>TRUCK UPGRADES</h2><p class="u-bank">Bank <b id="uBank">₹0</b></p></div></div>
+    <ul id="upgList" class="upg-list"></ul>
+    <p class="m-note">Upgrades work on every truck. Earn ₹ from coins, deliveries, close overtakes and daily missions.</p>
+    <div class="row"><button id="uClose" class="btn">Done</button></div>
+  </div>
+</div>
+
+<div id="daily" class="modal" hidden>
+  <div class="card daily-card">
+    <img class="mini-logo" data-logo alt="">
+    <h2>DAILY REWARD</h2>
+    <p id="dStreak" class="d-streak"></p>
+    <ol id="dDays" class="d-days"></ol>
+    <p class="m-note">Come back every day: the reward grows till Day 7. Miss a day and it starts again.</p>
+    <div class="row"><button id="dCollect" class="btn big">Collect</button></div>
+  </div>
+</div>
+
 <div id="result" class="modal" hidden>
   <div class="card">
     <img class="mini-logo" data-logo alt="">
@@ -684,7 +776,10 @@ button:focus-visible{outline:.18em solid var(--amber-2);outline-offset:.15em}
       <div><small>Close overtakes</small><b id="rNear">0</b></div>
       <div><small>Score</small><b id="rScore">0</b></div>
     </div>
-    <div class="row"><button id="rNext" class="btn">Next level</button><button id="rRetry" class="btn ghost">Retry</button><button id="rMenu" class="btn ghost">Menu</button></div>
+    <div id="resEarn" class="res-earn"></div>
+    <ul id="resMissions" class="res-ms"></ul>
+    <p id="resGoal" class="res-goal"></p>
+    <div class="row"><button id="rNext" class="btn">Next level</button><button id="rRetry" class="btn ghost">Retry</button><button id="rUpg" class="btn ghost upg can" hidden>Upgrade</button><button id="rMenu" class="btn ghost">Menu</button></div>
   </div>
 </div>
 
@@ -2472,7 +2567,7 @@ function steerInput(){
   if (G.ctl === 'tilt' && IN.tiltOn && !IN.left && !IN.right) return IN.tilt;
   return (IN.right ? 1 : 0) - (IN.left ? 1 : 0);
 }
-function topSpeed(){ return (TRUCKS[G.truckId].top * G.cfg.topMul + (G.boostT > 0 ? 45 : 0)) / 3.6; }
+function topSpeed(){ return (TRUCKS[G.truckId].top * G.cfg.topMul * upgMul('eng') + (G.boostT > 0 ? 45 : 0)) / 3.6; }
 function updatePlayer(dt){
   const T = TRUCKS[G.truckId], top = topSpeed();
   let gas = IN.gas || (G.autoGas && !IN.brake);
@@ -2482,15 +2577,15 @@ function updatePlayer(dt){
   if (G.braking && !brake && G.v > 3) sfx.airBrake();
   G.braking = brake;
   let a;
-  if (brake) a = G.v > 0.2 ? -12 : 0;
-  else if (gas) a = T.acc * (G.boostT > 0 ? 2.4 : 1) * Math.max(0.08, 1 - Math.pow(G.v / top, 2)) * (G.v < 6 ? 1.3 : 1);
+  if (brake) a = G.v > 0.2 ? -12 * upgMul('brake') : 0;
+  else if (gas) a = T.acc * upgMul('acc') * (G.boostT > 0 ? 2.4 : 1) * Math.max(0.08, 1 - Math.pow(G.v / top, 2)) * (G.v < 6 ? 1.3 : 1);
   else a = -(0.35 + G.v * 0.012);
   if (G.v > top) a = Math.min(a, -3.5);
   G.v = Math.max(0, G.v + a * dt); G.acc = a;
 
   const sIn = steerInput();
   G.steer = lerp(G.steer, sIn, damp(G.ctl === 'buttons' ? 6 : 12, dt));
-  const target = G.steer * (2.8 + G.v * 0.13) * T.handling * clamp(G.v / 3, 0.15, 1);
+  const target = G.steer * (2.8 + G.v * 0.13) * T.handling * upgMul('grip') * clamp(G.v / 3, 0.15, 1);
   G.vl = lerp(G.vl, target, damp(R.grip < 0.7 ? 1.6 : R.grip < 0.9 ? 3.5 : 7, dt));
   const drift = -(curvature(G.s) / 4) * G.v * G.v * 0.16 / Math.sqrt(R.grip);   // pushed wide on curves
   G.l += (G.vl + drift) * dt;
@@ -2504,7 +2599,7 @@ function updatePlayer(dt){
     }
   }
   const ds = G.v * dt; G.s += ds; G.score += ds * 0.1;
-  G.fuel = Math.max(0, G.fuel - ds / (G.cfg.kmTank * 1000) * (0.55 + 0.7 * G.throttle));
+  G.fuel = Math.max(0, G.fuel - ds / (G.cfg.kmTank * 1000) * (0.55 + 0.7 * G.throttle) * upgMul('tank'));
   G.boostT = Math.max(0, G.boostT - dt); G.inv = Math.max(0, G.inv - dt);
 
   const shoulder = Math.abs(G.l) > 5.4 - PL.W / 2 + 0.3 && G.v > 3;
@@ -2524,7 +2619,7 @@ function checkCollisions(){
     const lx = (PL.L + t.L) / 2 * 0.93, ly = (PL.W + t.W) / 2 * 0.84;
     if (!t.passed && ds < -lx){
       t.passed = true;
-      if (!t.fixed && Math.abs(dl) < ly + 1.2 && G.v > t.v + 2 && G.inv <= 0){ G.near++; G.score += 50; toast('CLOSE OVERTAKE +50', 'amber'); }
+      if (!t.fixed && Math.abs(dl) < ly + 1.2 && G.v > t.v + 2 && G.inv <= 0){ G.near++; rwCloseCall(); }
     }
     if (Math.abs(ds) < lx && Math.abs(dl) < ly){
       if (G.boostT > 0){ smash(t, dl); continue; }
@@ -2536,7 +2631,7 @@ function checkCollisions(){
 }
 function smash(t, dl){
   t.dead = 1.4; t.vy = 8; t.fy = 0; t.fx = (dl >= 0 ? 1 : -1) * 7; t.spin = (Math.random() < 0.5 ? -1 : 1) * rand(2, 4); t.v = Math.max(t.v, G.v * 1.05);
-  G.smash++; G.score += 100; G.shake = 0.7; toast('SMASH! +100', 'sky'); sfx.crash(0.6);
+  G.smash++; G.score += 100; G.shake = 0.7; toast('SMASH! +₹' + SMASH_PAY, 'sky'); sfx.crash(0.6);
   burst(t.grp.position.x, t.grp.position.y + 1.5, t.grp.position.z, 16, 0x5a5a5a, 3);
 }
 function hit(t, ds, dl){
@@ -2754,7 +2849,7 @@ function startRun(n, endless){
   ensureWorld();
   Object.assign(G, { s: 40, s0: 40, l: 0, v: 0, vl: 0, steer: 0, yaw: 0, roll: 0, pitch: 0, throttle: 0, fuel: 1, hearts: 3, inv: 0, boostT: 0,
     coins: 0, near: 0, smash: 0, score: 0, time: 0, shake: 0, outFuelT: 0, emitAcc: 0, dustAcc: 0, hours: TOD_START[G.tod],
-    pumpWarned: -1, pumpUsed: -1 });
+    pumpWarned: -1, pumpUsed: -1, combo: 0, comboT: -9, comboMax: 0, nearCash: 0, pumps: 0 });
   updateChunks(G.s, true);
   G.spawnAt = G.s + 90; G.itemAt = G.s + 60; G.oncAt = G.s + 30;
   while (G.spawnAt < G.s + 330){ spawnTrafficAt(G.spawnAt); G.spawnAt += G.cfg.gap * rand(0.6, 1.4); }
@@ -2790,7 +2885,7 @@ function updatePumps(){
   if (G.pumpUsed !== pk && Math.abs(dsP) < 16 && G.l < -1.6 && G.v < 50 / 3.6 && G.fuel < 0.97){
     G.pumpUsed = pk;
     const add = Math.min(1 - G.fuel, 0.6);
-    G.fuel += add; G.score += 20; sfx.pickup();
+    G.fuel += add; G.score += 20; G.pumps++; sfx.pickup();
     toast(`REFUELLED +${Math.round(add * 100)}% at ${pump[0]}${pump[2] ? ` • ₹${pump[2].toFixed(2)}/L` : ''}`, 'good');
   }
 }
@@ -2804,8 +2899,11 @@ function endRun(ok, reason){
     G.unlocked = Math.max(G.unlocked, Math.min(MAX_LV, G.level + 1));
     store.set('stars', G.stars); store.set('unlocked', G.unlocked);
   }
+  const best = G.endless && dist > G.bestEndless && dist > 300;
   if (G.endless && dist > G.bestEndless){ G.bestEndless = Math.round(dist); store.set('bestEndless', G.bestEndless); }
-  onRunEnd(ok, reason, stars, dist);
+  const rw = rwOnRunEnd(ok, dist, stars);                           // pay into the ₹ bank, tick the daily missions
+  rw.best = best;
+  onRunEnd(ok, reason, stars, dist, rw);
 }
 
 /* =================================================================
@@ -3103,6 +3201,191 @@ function renderMusic(){
 }
 
 /* =================================================================
+   DAMAN REWARDS — the "one more run" loop: every run pays into a ₹ bank,
+   the bank buys truck upgrades, a daily reward grows with the streak,
+   three daily missions and close-call combos give extra cash.
+   No real money anywhere: it's all game ₹, kept on this device.
+   ================================================================= */
+const RW = {
+  bank: store.get('bank', 0),
+  upg: Object.assign({ eng: 0, acc: 0, tank: 0, grip: 0 }, store.get('upg', {})),
+  daily: store.get('daily', { last: '', streak: 0 }),
+  ms: store.get('missions', null),
+  pendingDaily: null,
+};
+const SMASH_PAY = 15;
+const UPG_MAX = 5, UPG_COST = [300, 700, 1500, 3000, 6000];
+const UPGRADES = [
+  { id: 'eng',  name: 'Engine',   what: 'Top speed',            per: '+4% top speed' },
+  { id: 'acc',  name: 'Turbo',    what: 'Pickup',               per: '+8% pickup' },
+  { id: 'tank', name: 'Big tank', what: 'Diesel',               per: '−10% diesel used' },
+  { id: 'grip', name: 'Tyres',    what: 'Grip and brakes',      per: '+6% grip, +8% brakes' },
+];
+function upgMul(id){
+  const u = RW.upg;
+  switch (id){
+    case 'eng': return 1 + 0.04 * u.eng;
+    case 'acc': return 1 + 0.08 * u.acc;
+    case 'tank': return 1 - 0.1 * u.tank;
+    case 'grip': return 1 + 0.06 * u.grip;
+    case 'brake': return 1 + 0.08 * u.grip;
+  }
+  return 1;
+}
+const upgCost = id => RW.upg[id] >= UPG_MAX ? Infinity : UPG_COST[RW.upg[id]];
+const rupees = n => '₹' + Math.round(n).toLocaleString('en-IN');
+function bankAdd(n){ RW.bank += n; store.set('bank', RW.bank); rwBankUI(); }
+// cheapest next upgrade: what the result screen dangles ("₹230 more for Engine Lv 2")
+function nextUpgrade(){
+  let best = null;
+  for (const u of UPGRADES){ const c = upgCost(u.id); if (c < Infinity && (!best || c < best.cost)) best = { u, cost: c, lv: RW.upg[u.id] + 1 }; }
+  return best;
+}
+const canUpgrade = () => { const n = nextUpgrade(); return !!n && RW.bank >= n.cost; };
+
+/* ---------- close-call combos (called for every close overtake) ---------- */
+const COMBO_WORDS = ['CLOSE CALL', 'NICE!', 'SUPER!', 'AWESOME!', 'DAMAN STYLE!', 'UNSTOPPABLE!'];
+function rwCloseCall(){
+  G.combo = G.time - G.comboT < 4 ? G.combo + 1 : 1;               // overtakes within 4 s of each other chain up
+  G.comboT = G.time; G.comboMax = Math.max(G.comboMax, G.combo);
+  const cash = 20 * G.combo;
+  G.nearCash += cash; G.score += 50 * G.combo;
+  pop(`${COMBO_WORDS[Math.min(G.combo, COMBO_WORDS.length) - 1]}${G.combo > 1 ? '  x' + G.combo : ''}   +${rupees(cash)}`, G.combo);
+  sfx.coin(); if (G.combo >= 3) setTimeout(() => sfx.coin(), 90);
+}
+let popT = 0;
+function pop(text, lv){
+  const el = $('pop'); el.textContent = text;
+  el.className = ''; void el.offsetWidth; el.className = 'show lv' + Math.min(lv, 5);
+  clearTimeout(popT); popT = setTimeout(() => { el.className = ''; }, 1100);
+}
+const runCash = () => G.coins + G.nearCash + G.smash * SMASH_PAY;
+
+/* ---------- daily missions: three a day, the same for the whole day ---------- */
+const MISSION_POOL = [
+  { id: 'km',    txt: n => `Drive ${n} km`,                     n: [3, 5, 8],     pay: [300, 500, 800] },
+  { id: 'near',  txt: n => `Make ${n} close overtakes`,         n: [8, 15, 25],   pay: [300, 500, 800] },
+  { id: 'coins', txt: n => `Collect ${n} coins`,                n: [25, 50, 80],  pay: [300, 450, 700] },
+  { id: 'deliv', txt: n => `Complete ${n} deliveries`,          n: [2, 3, 5],     pay: [400, 600, 900] },
+  { id: 'pump',  txt: n => `Refuel at a pump ${n}×`,            n: [1, 2, 3],     pay: [250, 400, 600] },
+  { id: 'smash', txt: n => `Smash ${n} vehicles on a booster`,  n: [3, 6, 10],    pay: [300, 500, 800] },
+  { id: 'combo', txt: n => `Hit a x${n} close-call combo`,      n: [3, 4, 5],     pay: [350, 550, 900] },
+  { id: 'clean', txt: n => `Finish ${n} ${n > 1 ? 'deliveries' : 'delivery'} with no crash`, n: [1, 2, 3], pay: [400, 650, 1000] },
+];
+function dayKey(d){ d = d || new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function strHash(s){ let h = 2166136261; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function missionsToday(){
+  const key = dayKey();
+  if (RW.ms && RW.ms.date === key && Array.isArray(RW.ms.list)) return RW.ms;
+  const r = rng(strHash(key)), pool = MISSION_POOL.slice(), tier = G.unlocked < 6 ? 0 : G.unlocked < 15 ? 1 : 2, list = [];
+  while (list.length < 3){ const m = pool.splice(Math.floor(r() * pool.length), 1)[0]; list.push({ id: m.id, n: m.n[tier], pay: m.pay[tier], prog: 0, done: false }); }
+  RW.ms = { date: key, list }; store.set('missions', RW.ms);
+  return RW.ms;
+}
+const missionText = m => MISSION_POOL.find(p => p.id === m.id).txt(m.n);
+const missionProg = m => m.id === 'km' ? `${Math.min(m.prog, m.n).toFixed(1)}/${m.n}` : `${Math.min(Math.floor(m.prog), m.n)}/${m.n}`;
+
+/* ---------- end of a run: pay out, tick missions ---------- */
+function rwOnRunEnd(ok, dist, stars){
+  const e = { coins: G.coins, near: G.nearCash, smash: G.smash * SMASH_PAY, pay: 0, km: 0, missions: 0, done: [] };
+  if (ok && !G.endless) e.pay = Math.round((150 + 25 * G.level) * (1 + 0.25 * (stars - 1)) / 10) * 10;   // delivery fare
+  if (G.endless) e.km = Math.round(dist / 1000 * 60);                 // endless: ₹60 a kilometre
+  const ms = missionsToday();
+  const got = { km: dist / 1000, near: G.near, coins: G.coins / 10, deliv: ok && !G.endless ? 1 : 0, pump: G.pumps, smash: G.smash, clean: ok && !G.endless && G.hearts >= 3 ? 1 : 0 };
+  for (const m of ms.list){
+    if (m.done) continue;
+    m.prog = m.id === 'combo' ? Math.max(m.prog, G.comboMax) : m.prog + (got[m.id] || 0);
+    if (m.prog >= m.n){ m.done = true; e.missions += m.pay; e.done.push(m); }
+  }
+  store.set('missions', ms);
+  e.total = e.coins + e.near + e.smash + e.pay + e.km + e.missions;
+  bankAdd(e.total);
+  return e;
+}
+
+/* ---------- daily reward: grows with the login streak ---------- */
+const DAILY_PAY = [200, 300, 400, 500, 700, 1000, 2000];
+function dailyCheck(){
+  const key = dayKey();
+  if (RW.daily.last === key || RW.pendingDaily) return;
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const streak = RW.daily.last === dayKey(y) ? RW.daily.streak + 1 : 1;
+  RW.pendingDaily = { key, streak, pay: DAILY_PAY[Math.min(streak, 7) - 1] };
+  renderDaily(); $('daily').hidden = false;
+}
+function renderDaily(){
+  const p = RW.pendingDaily; if (!p) return;
+  $('dStreak').textContent = p.streak > 1 ? `🔥 ${p.streak} days in a row!` : 'Welcome back, driver!';
+  $('dDays').innerHTML = DAILY_PAY.map((v, i) => {
+    const day = i + 1, cls = day < Math.min(p.streak, 7) ? 'got' : day === Math.min(p.streak, 7) ? 'now' : '';
+    return `<li class="${cls}"><small>Day ${day}</small><b>${rupees(v)}</b></li>`;
+  }).join('');
+  $('dCollect').textContent = 'Collect ' + rupees(p.pay);
+}
+$('dCollect').addEventListener('click', () => {
+  const p = RW.pendingDaily; if (!p) return;
+  RW.daily = { last: p.key, streak: p.streak }; store.set('daily', RW.daily);
+  RW.pendingDaily = null; $('daily').hidden = true;
+  sfx.init(); sfx.win(); bankAdd(p.pay); rwHome();
+});
+
+/* ---------- screens: home card, bank chips, upgrade shop ---------- */
+function rwBankUI(){
+  for (const id of ['bankChip', 'gBank', 'uBank']) $(id).textContent = rupees(RW.bank);
+  const dot = canUpgrade();
+  for (const id of ['btnUpg', 'gUpg']) $(id).classList.toggle('can', dot);
+}
+function rwHome(){
+  rwBankUI();
+  const s = RW.daily.last ? RW.daily.streak : 0;
+  $('streakChip').hidden = s < 2; $('streakChip').textContent = `🔥 ${s} days`;
+  const ms = missionsToday(), left = ms.list.filter(m => !m.done).length;
+  $('homeMissions').innerHTML = `<h3>Today's missions <small>${left ? left + ' left' : 'all done ✓'}</small></h3>` + ms.list.map(m =>
+    `<div class="hm${m.done ? ' done' : ''}"><span>${m.done ? '✓ ' : ''}${missionText(m)}</span><b>${m.done ? 'DONE' : '+' + rupees(m.pay)}</b>
+      <i><em style="width:${Math.round(clamp(m.prog / m.n, 0, 1) * 100)}%"></em></i><small>${missionProg(m)}</small></div>`).join('');
+  dailyCheck();
+}
+function renderUpgrades(){
+  $('uBank').textContent = rupees(RW.bank);
+  $('upgList').innerHTML = UPGRADES.map(u => {
+    const lv = RW.upg[u.id], cost = upgCost(u.id), max = cost === Infinity, short = !max && RW.bank < cost;
+    return `<li><div class="u-txt"><b>${u.name} <small>Lv ${lv}/${UPG_MAX}</small></b><span>${u.what} · ${u.per} per level</span>
+        <i class="pips">${Array.from({ length: UPG_MAX }, (_, k) => `<em class="${k < lv ? 'on' : ''}"></em>`).join('')}</i></div>
+      <button class="btn u-buy${short ? ' short' : ''}" data-u="${u.id}"${max ? ' disabled' : ''}>${max ? 'MAX' : rupees(cost)}${short ? `<small>${rupees(cost - RW.bank)} more</small>` : ''}</button></li>`;
+  }).join('');
+}
+function openUpgrades(){ renderUpgrades(); $('upgrades').hidden = false; }
+$('upgList').addEventListener('click', e => {
+  const b = e.target.closest('.u-buy'); if (!b || b.disabled) return;
+  const id = b.dataset.u, cost = upgCost(id);
+  if (RW.bank < cost){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }
+  RW.upg[id]++; store.set('upg', RW.upg); bankAdd(-cost);
+  sfx.init(); sfx.pickup(); renderUpgrades();
+  if (G.screen === 'garage' && G.mode === 'menu') renderGarage();
+  if (!$('result').hidden) renderResultGoal();
+});
+$('uClose').addEventListener('click', () => { $('upgrades').hidden = true; if (G.mode === 'menu' && G.screen === 'home') rwHome(); });
+for (const id of ['btnUpg', 'gUpg', 'rUpg']) $(id).addEventListener('click', () => { cancelAutoNext(); openUpgrades(); });
+
+/* ---------- result screen: the pay slip, the next goal, mission ticks ---------- */
+function renderResultGoal(){
+  const n = nextUpgrade();
+  $('resGoal').innerHTML = !n ? '🏆 All upgrades done — you are a Daman legend!'
+    : RW.bank >= n.cost ? `⚡ You can buy <b>${n.u.name} Lv ${n.lv}</b> now!`
+    : `Only <b>${rupees(n.cost - RW.bank)}</b> more for <b>${n.u.name} Lv ${n.lv}</b>`;
+  $('rUpg').hidden = !(n && RW.bank >= n.cost);
+}
+function renderResultRewards(rw){
+  const rows = [['Coins', rw.coins], ['Close calls', rw.near], ['Smashed', rw.smash], ['Delivery fare', rw.pay], ['Distance pay', rw.km], ['Missions', rw.missions]].filter(r => r[1] > 0);
+  $('resEarn').innerHTML = rows.map(([k, v]) => `<span>${k}</span><b>+${rupees(v)}</b>`).join('')
+    + `<span class="tot">Bank</span><b class="tot">${rupees(RW.bank)}</b>`;
+  const ms = RW.ms ? RW.ms.list : [];
+  $('resMissions').innerHTML = ms.map(m => `<li class="${m.done ? 'done' : ''}${rw.done.includes(m) ? ' new' : ''}"><span>${m.done ? '✓' : '•'} ${missionText(m)}</span><b>${rw.done.includes(m) ? '+' + rupees(m.pay) : m.done ? 'done' : missionProg(m)}</b></li>`).join('');
+  renderResultGoal();
+  if (rw.done.length) setTimeout(() => sfx.win(), 450);
+}
+
+/* =================================================================
    SOUND — tiny WebAudio synth (engine, horn, air brake, pickups)
    ================================================================= */
 const sfx = (() => {
@@ -3171,6 +3454,7 @@ function show(name){
   viewShift = name === 'garage' ? gShift() : [0, 0];
   applyViewShift();
   if (name === 'garage') renderGarage();
+  if (name === 'home') rwHome();                                     // bank, streak, today's missions (+ the daily reward once a day)
   if (name === 'routes') renderRoutes();
   if (name === 'levels') renderLevels();
 }
@@ -3186,7 +3470,9 @@ function flashRed(){ const f = $('flash'); f.style.opacity = 1; setTimeout(() =>
 function renderGarage(){
   const T = TRUCKS[G.truckId], cur = paintFor(G.truckId);
   $('gName').textContent = T.name; $('gWheels').textContent = T.wheels + ' WHEELS'; $('gSub').textContent = T.sub;
-  const stats = [['Top speed', T.top / 160, T.top + ' km/h'], ['Pickup', T.acc / 4.6, T.acc.toFixed(1) + ' m/s²'], ['Handling', T.handling, Math.round(T.handling * 100) + '%'], ['Length', T.L / 17, T.L + ' m']];
+  const top = Math.round(T.top * upgMul('eng')), acc = T.acc * upgMul('acc'), hand = T.handling * upgMul('grip');   // with the bought upgrades
+  const stats = [['Top speed', top / 190, top + ' km/h'], ['Pickup', acc / 7, acc.toFixed(1) + ' m/s²'], ['Handling', hand / 1.3, Math.round(hand * 100) + '%'], ['Length', T.L / 17, T.L + ' m']];
+  rwBankUI();
   $('gStats').innerHTML = stats.map(([n, f, v]) => `<span>${n}</span><div class="bar"><i style="width:${Math.round(clamp(f, 0, 1) * 100)}%"></i></div><b>${v}</b>`).join('');
   $('gColors').innerHTML = '<span>Cab paint</span>' + PAINTS.map(p => `<button class="sw${p === cur ? ' on' : ''}" style="background:${p}" data-p="${p}" aria-label="Paint colour ${p}"></button>`).join('');
   const crew = conductorFor(G.truckId);
@@ -3316,7 +3602,7 @@ function showCoach(){
   $('coach').hidden = false;
   clearTimeout(coachTimer); coachTimer = setTimeout(() => { $('coach').hidden = true; }, 7000);
 }
-function onRunEnd(ok, reason, stars, dist){
+function onRunEnd(ok, reason, stars, dist, rw){
   $('coach').hidden = true; hidePumpSign(); musicHold();           // the song stops with the truck; the next run picks it up
   sfx.engine(false, 0, 0); sfx.horn(false); if (ok) sfx.win();
   resetInputs();
@@ -3329,16 +3615,34 @@ function onRunEnd(ok, reason, stars, dist){
     : G.endless ? `${reason} Best: ${(G.bestEndless / 1000).toFixed(2)} km` : reason;
   $('resStars').hidden = G.endless;
   $('resStars').innerHTML = [0, 1, 2].map(i => STAR(ok && i < stars)).join('');
+  if (rw.best){ t.textContent = 'NEW BEST!'; t.style.color = 'var(--amber-2)'; }
   $('rDist').textContent = (dist / 1000).toFixed(2) + ' km';
-  $('rCoins').textContent = '₹' + G.coins;
-  $('rNear').textContent = G.near;
+  $('rCoins').textContent = '+' + rupees(rw.total);
+  $('rNear').textContent = G.near + (G.comboMax > 1 ? ` (best x${G.comboMax})` : '');
   $('rScore').textContent = Math.round(G.score).toLocaleString('en-IN');
-  $('rNext').hidden = !ok || G.endless || G.level >= MAX_LV;
+  renderResultRewards(rw);
+  const next = ok && !G.endless && G.level < MAX_LV;
+  $('rNext').hidden = !next;
   $('result').hidden = false;
+  if (next) startAutoNext();
 }
-$('rNext').addEventListener('click', () => startRun(G.level + 1, false));
-$('rRetry').addEventListener('click', () => startRun(G.level, G.endless));
-$('rMenu').addEventListener('click', () => { parkTruck(); show('levels'); });
+// a delivered load rolls straight into the next level after a short countdown (any tap on the card stops it)
+let autoNextT = 0, autoNextN = 0;
+function startAutoNext(){
+  cancelAutoNext(); autoNextN = 6;
+  const tick = () => {
+    if ($('result').hidden || G.mode !== 'result'){ cancelAutoNext(); return; }
+    if (autoNextN <= 0){ cancelAutoNext(); startRun(G.level + 1, false); return; }
+    $('rNext').innerHTML = `Next level <small class="cd">${autoNextN}</small>`; autoNextN--;
+    autoNextT = setTimeout(tick, 1000);
+  };
+  tick();
+}
+function cancelAutoNext(){ clearTimeout(autoNextT); autoNextT = 0; $('rNext').textContent = 'Next level'; }
+$('result').addEventListener('pointerdown', e => { if (!e.target.closest('#rNext')) cancelAutoNext(); });
+$('rNext').addEventListener('click', () => { cancelAutoNext(); startRun(G.level + 1, false); });
+$('rRetry').addEventListener('click', () => { cancelAutoNext(); startRun(G.level, G.endless); });
+$('rMenu').addEventListener('click', () => { cancelAutoNext(); parkTruck(); show('levels'); });
 
 /* ---------- pause + settings ---------- */
 function pauseGame(){ if (G.mode !== 'play') return; G.mode = 'pause'; $('pause').hidden = false; sfx.engine(false, 0, 0); sfx.horn(false); resetInputs(); musicHold(); }
@@ -3567,7 +3871,7 @@ function updateHUD(){
   hset('tier', $('hTier'), TIERS[G.cfg.tier][0]);
   hset('clock', HUD.clock, clockText(G.hours));
   if (HL.hearts !== G.hearts){ HL.hearts = G.hearts; HUD.hearts.innerHTML = [0, 1, 2].map(i => HEART(i < G.hearts)).join(''); }
-  hset('coins', HUD.coins, '₹' + G.coins);
+  hset('coins', HUD.coins, rupees(runCash()));
   const boosting = G.boostT > 0;
   if (HL.boost !== boosting){ HL.boost = boosting; HUD.boost.hidden = !boosting; }
   if (boosting) HUD.boost.firstElementChild.style.transform = `scaleX(${G.boostT / 5})`;
@@ -3654,7 +3958,7 @@ if (location.hostname === 'localhost'){
     state(){ return { mode: G.mode, kmh: Math.round(G.v * 3.6), s: Math.round(G.s - G.s0), l: +G.l.toFixed(2), fuel: +G.fuel.toFixed(3), hearts: G.hearts,
       coins: G.coins, traffic: traffic.length, onc: oncoming.length, items: items.length, chunks: chunks.size, night: +G.night.toFixed(2), hours: +G.hours.toFixed(2),
       calls: renderer.info.render.calls, tris: renderer.info.render.triangles, parts: pGeo.drawRange.count }; },
-    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); },
+    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); }, closeCall(){ G.near++; rwCloseCall(); },
     music(){ const it = curItem(); return { playing: MUSIC.playing, idx: MUSIC.idx, song: it && it.name, songs: musicList().length, yt: YTP.loaded, ytState: YTP.state, ytReady: YTP.ready, tv: !$('ytDock').hidden }; }
   };
 }
