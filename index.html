@@ -936,6 +936,29 @@ TEX.wheel = canvasTex(512, 256, (g) => {
   g.fillStyle = '#0f1012';
   for (let y = -16; y < 256; y += 22){ g.beginPath(); g.moveTo(262, y); g.lineTo(384, y + 14); g.lineTo(506, y); g.lineTo(506, y + 9); g.lineTo(384, y + 23); g.lineTo(262, y + 9); g.fill(); }
 });
+TEX.wheelMud = canvasTex(512, 256, (g) => {                    // hard-working fleet wheels: dusty tyres, dark steel rims caked in mud
+  const cx = 128, cy = 128, r = rng(4242);
+  g.fillStyle = '#3d362f'; g.fillRect(0, 0, 512, 256);
+  g.fillStyle = '#433b33'; g.beginPath(); g.arc(cx, cy, 126, 0, 7); g.fill();
+  g.strokeStyle = '#51483e'; g.lineWidth = 4; for (let rr = 100; rr < 124; rr += 8){ g.beginPath(); g.arc(cx, cy, rr, 0, 7); g.stroke(); }
+  g.fillStyle = '#5a534b'; g.beginPath(); g.arc(cx, cy, 78, 0, 7); g.fill();          // steel rim
+  g.fillStyle = '#3f3a35'; g.beginPath(); g.arc(cx, cy, 66, 0, 7); g.fill();
+  g.fillStyle = '#26231f';
+  for (let i = 0; i < 8; i++){ const a = i / 8 * Math.PI * 2; g.beginPath(); g.ellipse(cx + Math.cos(a) * 54, cy + Math.sin(a) * 54, 9, 6, a, 0, 7); g.fill(); }
+  g.fillStyle = '#6b6259'; g.beginPath(); g.arc(cx, cy, 26, 0, 7); g.fill();          // hub
+  g.fillStyle = '#2b2824';
+  for (let i = 0; i < 8; i++){ const a = i / 8 * Math.PI * 2 + 0.2; g.beginPath(); g.arc(cx + Math.cos(a) * 34, cy + Math.sin(a) * 34, 4.5, 0, 7); g.fill(); }
+  for (let i = 0; i < 90; i++){ g.fillStyle = `rgba(${120 + r() * 40 | 0},${95 + r() * 30 | 0},${70 + r() * 20 | 0},${(0.15 + r() * 0.3).toFixed(2)})`; const a = r() * 7, d = 30 + r() * 95; g.beginPath(); g.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 2 + r() * 7, 0, 7); g.fill(); }
+  g.fillStyle = '#c9a23a'; g.fillRect(cx - 4, cy - 70, 8, 12);                          // faded marker so the spin still shows
+  g.fillStyle = '#3a332c'; g.fillRect(256, 0, 256, 256);
+  g.fillStyle = '#262220';
+  for (let y = -16; y < 256; y += 22){ g.beginPath(); g.moveTo(262, y); g.lineTo(384, y + 14); g.lineTo(506, y); g.lineTo(506, y + 9); g.lineTo(384, y + 23); g.lineTo(262, y + 9); g.fill(); }
+});
+TEX.mesh = canvasTex(64, 64, (g, w, h) => {                      // wire-mesh guard on the sleeper window
+  g.clearRect(0, 0, w, h); g.strokeStyle = "#1c1d20"; g.lineWidth = 3;
+  for (let i = -w; i < w * 2; i += 10){ g.beginPath(); g.moveTo(i, 0); g.lineTo(i + h, h); g.stroke(); g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.stroke(); }
+  g.strokeRect(1, 1, w - 2, h - 2);
+});
 TEX.hop = canvasTex(256, 128, (g, w, h) => {                   // "HORN OK PLEASE" rear panel
   g.fillStyle = '#f5c518'; g.fillRect(0, 0, w, h);
   g.fillStyle = '#b3202a'; g.fillRect(0, 0, w, 10); g.fillRect(0, h - 10, w, 10);
@@ -984,6 +1007,49 @@ function artTex(hex){                                            // Indian truck
     g.lineWidth = 4; g.strokeText('MANDEEP ROADLINE', w / 2, h / 2 + 62); g.fillText('MANDEEP ROADLINE', w / 2, h / 2 + 62);
   });
 }
+// open-body side of the real Daman fleet truck (from the owner's photo): dark ribbed steel panels with dust and
+// rust, a sky-blue band over a yellow pinstripe, one big yellow script letter per panel and the Daman badge board.
+// Texture left = rear of the truck (it reads the same way on both sides because each side's plane faces outwards)
+const dsideCache = {};
+function damanSideTex(band, text){
+  const key = band + '|' + text;
+  return dsideCache[key] || (dsideCache[key] = canvasTex(1536, 272, (g, w, h) => {
+    const panels = 16, pw = w / panels, bandY = h * 0.76, bandH = h * 0.15, r = rng(key.length * 7919 + 131);
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#5d6066'); gr.addColorStop(0.55, '#4c4f55'); gr.addColorStop(1, '#3e4146');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 320; i++){                                // road dust and rust specks, heavier low down
+      g.fillStyle = `rgba(${90 + r() * 60 | 0},${70 + r() * 35 | 0},${48 + r() * 20 | 0},${(0.05 + r() * 0.13).toFixed(2)})`;
+      g.fillRect(r() * w, h * 0.3 + r() * h * 0.46, 2 + r() * 12, 1 + r() * 5);
+    }
+    for (let i = 0; i < 26; i++){                                 // rust streaks running down from the top rail
+      const x = r() * w, len = 40 + r() * 70, sg = g.createLinearGradient(0, 10, 0, 10 + len);
+      sg.addColorStop(0, 'rgba(122,72,38,.4)'); sg.addColorStop(1, 'rgba(122,72,38,0)'); g.fillStyle = sg; g.fillRect(x, 10, 2 + r() * 3, len);
+    }
+    g.fillStyle = '#26282c'; g.fillRect(0, 0, w, 10); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(0, 10, w, 2);   // top rail
+    for (let i = 1; i < panels; i++){ const x = i * pw; g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(x - 2, 0, 4, bandY); g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(x + 2, 0, 2, bandY); }
+    g.fillStyle = band; g.fillRect(0, bandY, w, bandH);                                        // sky-blue band
+    g.fillStyle = '#f5c518'; g.fillRect(0, bandY + bandH, w, h * 0.035);                       // yellow pinstripe
+    g.fillStyle = '#2b2d31'; g.fillRect(0, bandY + bandH + h * 0.035, w, h);
+    g.fillStyle = 'rgba(255,255,255,.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `600 ${h * 0.072 | 0}px ${FONT_B}`;
+    for (let i = 1; i < panels; i += 3) g.fillText('DAMAN MANDEEP ROADLINE', (i + 1) * pw, bandY + bandH / 2 + 1);
+    const letters = [...text], p0 = Math.round(panels * 0.48 - letters.length / 2);
+    letters.forEach((ch, k) => {                                  // one big script letter per panel, with a white swoosh
+      const cx = (p0 + k + 0.5) * pw, cy = bandY - h * 0.25;
+      g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 5;
+      g.beginPath(); g.ellipse(cx + pw * 0.04, cy + h * 0.06, pw * 0.42, h * 0.075, -0.2, 0.15, Math.PI * 1.05); g.stroke();
+      g.font = `italic 700 ${h * 0.47 | 0}px Georgia,'Times New Roman',serif`;
+      g.lineWidth = 11; g.strokeStyle = band; g.strokeText(ch, cx, cy);
+      g.fillStyle = '#f5c518'; g.fillText(ch, cx, cy);
+    });
+    const bx = (panels - 3.5) * pw, by = h * 0.46;                // Daman badge board near the front end
+    g.fillStyle = '#f4f4f0'; g.fillRect(bx - 46, by - 42, 92, 84); drawLogo(g, bx, by, 74);
+  }));
+}
+const dsideMatCache = {};
+function dsideMat(k){
+  const [band, text] = k.split('|');
+  return dsideMatCache[k] || (dsideMatCache[k] = stdMat({ map: damanSideTex(band, text || 'Daman'), roughness: 0.85, metalness: 0.02, polygonOffset: true, polygonOffsetFactor: -2 }));
+}
 function signTex(lines, w = 512, h = 256){                        // green highway sign board
   return canvasTex(w, h, (g) => {
     g.fillStyle = '#136b3a'; g.fillRect(0, 0, w, h);
@@ -1010,6 +1076,7 @@ const MAT = {
   chrome: stdMat({ color: 0xe4e8ee, roughness: 0.18, metalness: 1.0 }, true),
   glass: stdMat({ color: 0x0b141d, roughness: 0.05, metalness: 0.7, envMapIntensity: 1.6 }, true),
   wheel: stdMat({ map: TEX.wheel, roughness: 0.8, metalness: 0.1 }),
+  wheelMud: stdMat({ map: TEX.wheelMud, roughness: 0.95, metalness: 0.05 }),
   head: stdMat({ color: 0xffffff, emissive: 0xfff1c4, emissiveIntensity: 0.4 }),
   tail: stdMat({ color: 0x5a0a06, emissive: 0xff2a14, emissiveIntensity: 0.5 }),
   amber: stdMat({ color: 0x7a4a00, emissive: 0xffa000, emissiveIntensity: 0.5 }),
@@ -1024,6 +1091,7 @@ const MAT = {
   diesel: stdMat({ map: TEX.diesel, roughness: 0.4, metalness: 0.3, polygonOffset: true, polygonOffsetFactor: -2 }),
   plastic: stdMat({ color: 0x1d1f24, roughness: 0.7 }),
   logo: stdMat({ map: TEX.logo, roughness: 0.45, polygonOffset: true, polygonOffsetFactor: -2 }),
+  mesh: stdMat({ map: TEX.mesh, transparent: true, alphaTest: 0.35, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -3 }),
 };
 const paintCache = {};
 function paintMat(hex){
@@ -1043,6 +1111,7 @@ function getMat(key){
   if (key.startsWith('paint:')) return paintMat(key.slice(6));
   if (key.startsWith('cargo:')) return cargoMat(key.slice(6));
   if (key.startsWith('art:')) return artMat(key.slice(4));
+  if (key.startsWith('dside:')) return dsideMat(key.slice(6));
   return MAT.dark;
 }
 const GLOW_MAT = {
@@ -1739,7 +1808,7 @@ function updateWeather(dt, speed, tan, inCab){
    faces local -z; origin = ground level, centre of its length.
    ================================================================= */
 const TRUCKS = {
-  '14':   { name: '14 Wheeler', sub: 'Hi-deck body with tarpaulin • balanced all-rounder', wheels: 14, L: 11.0, top: 138, acc: 4.1, handling: 1.0, cab: '#c62828', body: '#f2a900' },
+  '14':   { name: '14 Wheeler', sub: 'The real Daman fleet truck • open steel body • all-rounder', wheels: 14, L: 12.0, top: 138, acc: 4.1, handling: 1.0, cab: '#e0662a', body: '#6fb8e0' },
   '16':   { name: '16 Wheeler', sub: 'Tipper loaded with sand • heavy and strong',         wheels: 16, L: 10.8, top: 128, acc: 3.6, handling: 0.9, cab: '#f2b705', body: '#e07b1a' },
   '18':   { name: '18 Wheeler', sub: 'Open-body trailer with steel coils • fastest',       wheels: 18, L: 16.5, top: 155, acc: 3.5, handling: 0.8, cab: '#1f5fa8', body: '#2c3e50' },
   'tank': { name: 'Diesel Tanker', sub: 'Fuel tanker • quick and nimble',                  wheels: 12, L: 11.2, top: 146, acc: 4.4, handling: 0.95, cab: '#e9edf1', body: '#c62828' },
@@ -1774,7 +1843,7 @@ class Builder {
     const w = 0.34, parts = [];
     const xs = dual ? [W / 2 - 0.2, W / 2 - 0.56] : [W / 2 - 0.2];
     for (const x of xs){ parts.push(wheelGeo(r, w).clone().translate(x, 0, 0)); parts.push(wheelGeo(r, w).clone().translate(-x, 0, 0)); }
-    const m = new THREE.Mesh(merge(parts), MAT.wheel);
+    const m = new THREE.Mesh(merge(parts), this.wheelMat || MAT.wheel);
     m.position.set(0, r, z); m.rotation.order = 'YXZ'; m.castShadow = true;
     m.userData.r = r; m.userData.steer = !!steer; m.userData.axle = true;
     this.axles.push(m);
@@ -1825,6 +1894,52 @@ function addCab(B, zf, W, paint, rF, tankZ){
   B.glow('white', -0.93, 1.45, zf - 0.15, 1.6); B.glow('white', 0.93, 1.45, zf - 0.15, 1.6);
   return { exhaust: new THREE.Vector3(-W / 2 + 0.28, 3.85, zf + 2.35) };
 }
+// cab of the real Daman fleet truck (from the owner's photo): cream lower half, window frames in the accent colour,
+// a white roof carrier with an accent lip, a sleeper window behind a wire mesh, pinstripes along the cream.
+// Same outside box as addCab, so the cabin interior and the cameras fit it unchanged
+function addCabDaman(B, zf, W, accent, rF, tankZ){
+  const A = 'paint:' + accent, C = 'paint:#ebe6d8', CW = W - 0.05;
+  B.box(C, CW, 2.0, 2.2, 0, 2.15, zf + 1.15);                                // one cream shell (no inner faces to see from the cab)
+  // accent band round the windows: one-sided skins just outside the shell, so they never show from inside
+  B.decal(A, 2.2, 0.85, CW / 2 + 0.006, 2.625, zf + 1.15, 'right'); B.decal(A, 2.2, 0.85, -CW / 2 - 0.006, 2.625, zf + 1.15, 'left');
+  B.decal(A, CW, 0.85, 0, 2.625, zf + 0.044, 'front'); B.decal(A, CW, 0.85, 0, 2.625, zf + 2.256, 'rear');
+  B.box('paint:#efeee8', W - 0.1, 0.5, 2.1, 0, 3.42, zf + 1.2);              // roof carrier
+  B.box(A, W - 0.06, 0.07, 2.14, 0, 3.7, zf + 1.2);                          // its accent lip
+  B.box('paint:#efeee8', W - 0.1, 0.45, 0.08, 0, 3.4, zf + 0.13, -0.25);     // sloped carrier front
+  for (const sx of [1, -1]){
+    B.box('paint:#f2a31b', 0.02, 0.07, 2.1, sx * (CW / 2 + 0.006), 2.08, zf + 1.15);   // yellow-orange pinstripe
+    B.box('paint:#c62828', 0.02, 0.028, 2.1, sx * (CW / 2 + 0.006), 1.97, zf + 1.15);  // thin red one under it
+    B.box('dark', 0.03, 0.04, 0.16, sx * (CW / 2 + 0.01), 1.9, zf + 1.55);             // door handle
+  }
+  B.box('glass', W - 0.3, 0.8, 0.06, 0, 2.62, zf + 0.03);                    // windscreen
+  for (const sx of [1, -1]){
+    B.box('glass', 0.06, 0.62, 0.95, sx * (W / 2 - 0.02), 2.62, zf + 0.72);  // door window
+    B.box('glass', 0.06, 0.5, 0.55, sx * (W / 2 - 0.02), 2.64, zf + 1.78);   // sleeper window …
+    B.decal('mesh', 0.55, 0.5, sx * (W / 2 + 0.012), 2.64, zf + 1.78, sx > 0 ? 'right' : 'left');   // … behind a wire mesh
+  }
+  B.box('dark', 1.5, 0.62, 0.08, 0, 1.58, zf + 0.01);                        // grill
+  for (let i = 0; i < 4; i++) B.box('chrome', 1.4, 0.05, 0.04, 0, 1.36 + i * 0.15, zf - 0.03);
+  B.decal('plate', 0.9, 0.22, 0, 1.95, zf - 0.035, 'front');
+  B.decal('logo', 0.62, 0.55, W / 2 - 0.013, 1.55, zf + 1.3, 'right');      // Daman logo on both doors
+  B.decal('logo', 0.62, 0.55, -W / 2 + 0.013, 1.55, zf + 1.3, 'left');
+  B.box('head', 0.42, 0.26, 0.06, -0.93, 1.45, zf - 0.005); B.box('head', 0.42, 0.26, 0.06, 0.93, 1.45, zf - 0.005);
+  B.box('amber', 0.3, 0.12, 0.05, -0.93, 1.22, zf - 0.005); B.box('amber', 0.3, 0.12, 0.05, 0.93, 1.22, zf - 0.005);
+  for (let i = -2; i <= 2; i++) B.box('amber', 0.16, 0.08, 0.05, i * 0.45, 3.62, zf + 0.12);   // marker lights on the carrier
+  B.box('chassis', W + 0.05, 0.38, 0.32, 0, 0.9, zf + 0.1);                  // bumper
+  B.box('chrome', W - 0.3, 0.06, 0.04, 0, 1.0, zf - 0.07);
+  B.box('dark', 0.5, 0.12, 0.45, W / 2 - 0.25, 0.72, zf + 0.9); B.box('dark', 0.5, 0.12, 0.45, -W / 2 + 0.25, 0.72, zf + 0.9);   // steps
+  B.box('dark', 0.34, 0.06, 0.06, W / 2 + 0.15, 2.65, zf + 0.35); B.box('dark', 0.34, 0.06, 0.06, -W / 2 - 0.15, 2.65, zf + 0.35);   // mirror arms
+  B.box('dark', 0.08, 0.5, 0.22, W / 2 + 0.33, 2.45, zf + 0.35); B.box('dark', 0.08, 0.5, 0.22, -W / 2 - 0.33, 2.45, zf + 0.35);
+  B.cyl('chrome', 0.06, 0.11, 0.55, 10, 0.35, 3.8, zf + 0.9, Math.PI / 2); B.cyl('chrome', 0.06, 0.11, 0.55, 10, -0.35, 3.8, zf + 0.9, Math.PI / 2);   // air horns
+  B.cyl('chrome', 0.09, 0.09, 1.9, 10, -W / 2 + 0.28, 2.85, zf + 2.35);      // exhaust stack behind the cab
+  B.box('dark', 0.24, 0.9, 0.08, -W / 2 + 0.28, 2.5, zf + 2.24);
+  B.box('chassis', 0.55, 0.6, 1.1, W / 2 - 0.3, 0.85, zf + (tankZ || 2.95));            // dark diesel tank box, as on the photo
+  for (const z of [1.3, 3.66]){                                              // black mudguards over both steering axles
+    B.box('dark', 0.5, 0.08, 1.2, W / 2 - 0.25, rF * 2 + 0.1, zf + z); B.box('dark', 0.5, 0.08, 1.2, -W / 2 + 0.25, rF * 2 + 0.1, zf + z);
+  }
+  B.glow('white', -0.93, 1.45, zf - 0.15, 1.6); B.glow('white', 0.93, 1.45, zf - 0.15, 1.6);
+  return { exhaust: new THREE.Vector3(-W / 2 + 0.28, 3.85, zf + 2.35) };
+}
 function addRear(B, z, W, y){
   B.box('chassis', W, 0.3, 0.2, 0, y, z);
   B.box('tail', 0.34, 0.2, 0.06, -W / 2 + 0.3, y + 0.25, z + 0.07); B.box('tail', 0.34, 0.2, 0.06, W / 2 - 0.3, y + 0.25, z + 0.07);
@@ -1852,28 +1967,40 @@ function bagStack(B, width, z0, z1, y0, layers){
       for (let x = -width / 2 + 0.3; x < width / 2 - 0.2; x += 0.58)
         B.box('cement', 0.55, 0.2, 0.88, x + (r() - 0.5) * 0.04, y0 + 0.1 + L * 0.21, z + (r() - 0.5) * 0.06, 0, (r() - 0.5) * 0.08, 0);
 }
-function buildTruck(id, cabHex, bodyHex, cargo){
+function buildTruck(id, cabHex, bodyHex, cargo, sideText){
   const T = TRUCKS[id], L = T.L, W = 2.5, zf = -L / 2, zr = L / 2, B = new Builder();
   const rF = 0.52, rR = 0.52;
   let info;
   if (id === '14'){
-    info = addCab(B, zf, W, cabHex, rF);
-    B.box('chassis', 1.0, 0.32, L - 1.0, 0, 1.0, 0.3);
-    const b0 = zf + 2.5, b1 = zr - 0.15, bl = b1 - b0, bc = (b0 + b1) / 2;
-    B.box('chassis', W, 0.18, bl, 0, 1.3, bc);
-    B.box('paint:' + bodyHex, 0.08, 2.0, bl, W / 2 - 0.04, 2.38, bc); B.box('paint:' + bodyHex, 0.08, 2.0, bl, -W / 2 + 0.04, 2.38, bc);
-    B.box('paint:' + bodyHex, W, 2.35, 0.1, 0, 2.5, b0);                      // headboard
-    B.box('paint:' + bodyHex, W, 2.0, 0.08, 0, 2.38, b1);
-    B.decal('art:' + bodyHex, bl - 0.3, 1.8, W / 2 + 0.005, 2.38, bc, 'right');
-    B.decal('art:' + bodyHex, bl - 0.3, 1.8, -W / 2 - 0.005, 2.38, bc, 'left');
-    B.decal('hop', 2.1, 1.05, 0, 2.3, b1 + 0.045, 'rear');
-    const tarp = new THREE.CylinderGeometry(1.26, 1.26, bl, 16, 1, false, Math.PI / 2, Math.PI);
-    B.add('tarp', tr(tarp, 0, 3.38, bc, Math.PI / 2, 0, 0, 1, 1, 0.42));
-    B.box('tarp', W + 0.02, 0.12, bl, 0, 3.36, bc);
-    for (let z = b0 + 1.2; z < b1 - 0.5; z += 1.6) B.box('dark', W + 0.12, 0.03, 0.05, 0, 3.72, z);   // tie-down ropes
-    addRear(B, zr, W, 0.95); mudflaps(B, zr - 0.2, W);
-    B.axle(zf + 1.3, rF, W, false, true);
-    B.axle(zr - 4.1, rR, W, true); B.axle(zr - 2.8, rR, W, true); B.axle(zr - 1.5, rR, W, true);
+    // the real Daman fleet truck, measured off the owner's side photo (≈56 px a metre): twin steering axles,
+    // three at the back (two dual, the last single = 14 tyres), a 9.4 m open steel body with a tall headboard
+    const r = 0.54;
+    B.wheelMat = MAT.wheelMud;                                                // muddy wheels like the photo
+    info = addCabDaman(B, zf, W, cabHex, r, 4.9);
+    B.box('chassis', 1.0, 0.32, L - 1.0, 0, 1.0, 0.3);                        // frame rails
+    const b0 = zf + 2.6, b1 = zr - 0.05, bl = b1 - b0, bc = (b0 + b1) / 2, S = 'paint:#4a4d53', R = 'paint:#34363b';
+    const side = 'dside:' + bodyHex + '|' + (sideText || 'Daman');
+    B.box('chassis', W, 0.16, bl, 0, 1.36, bc);                               // deck
+    B.box(S, 0.06, 1.66, bl, W / 2 - 0.03, 2.25, bc); B.box(S, 0.06, 1.66, bl, -W / 2 + 0.03, 2.25, bc);   // steel sides, 1.42–3.08 m
+    B.decal(side, bl, 1.66, W / 2 + 0.004, 2.25, bc, 'right');
+    B.decal(side, bl, 1.66, -W / 2 - 0.004, 2.25, bc, 'left');
+    for (let k = 1; k < 16; k++){                                             // vertical ribs between the 16 panels
+      const z = b1 - k * bl / 16;
+      B.box(R, 0.07, 1.26, 0.06, W / 2 + 0.03, 2.4, z); B.box(R, 0.07, 1.26, 0.06, -W / 2 - 0.03, 2.4, z);
+    }
+    B.box(R, 0.12, 0.1, bl, W / 2, 3.1, bc); B.box(R, 0.12, 0.1, bl, -W / 2, 3.1, bc);   // top rails
+    B.box(S, W, 2.55, 0.1, 0, 2.68, b0);                                     // tall headboard, up over the cab
+    B.box(R, W + 0.06, 0.1, 0.35, 0, 3.98, b0 - 0.1);
+    B.box(S, W, 1.66, 0.08, 0, 2.25, b1);                                     // tailgate
+    B.decal('hop', 2.1, 1.0, 0, 2.3, b1 + 0.045, 'rear');
+    B.box('dark', W - 0.12, 0.04, bl - 0.2, 0, 1.46, bc);                     // floor inside
+    if (cargo && cargo.bags) bagStack(B, W - 0.3, b0 + 0.15, b1 - 0.15, 1.5, 6);
+    else if (cargo) B.add('cargo:' + cargo.hex, heapGeo(1.12, 1.8, bl / 2 - 0.25, 0.2).translate(0, 1.5, bc));   // coal / ore heap
+    B.box('dark', 0.5, 0.55, 1.0, W / 2 - 0.3, 0.85, zf + 6.1);              // toolbox between the axles
+    B.cyl('steel', 0.16, 0.16, 1.0, 10, -W / 2 + 0.35, 0.85, zf + 5.9, Math.PI / 2);   // air tank
+    addRear(B, zr, W, 0.95); mudflaps(B, zr - 0.15, W);
+    B.axle(zf + 1.43, r, W, false, true); B.axle(zf + 3.66, r, W, false, true);
+    B.axle(zf + 7.86, r, W, true); B.axle(zf + 9.29, r, W, true); B.axle(zf + 10.9, r, W, false);
   } else if (id === '16'){
     info = addCab(B, zf, W, cabHex, rF, 3.9);
     B.box('chassis', 1.0, 0.32, L - 1.0, 0, 1.0, 0.3);
@@ -1987,9 +2114,9 @@ function makeTrafficTemplates(){
   for (const c of carCols) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'car'), { w: 3 }));
   for (const c of ['#1b8a4b', '#e9edf1', '#1f5fa8']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'pickup'), { w: 1.4 }));
   for (const c of ['#b3202a', '#1f5fa8', '#e07b1a']) TRAFFIC_TPL.push(Object.assign(buildCar(c, 'bus'), { w: 1.2 }));
-  const tk = [['14', '#1b8a4b', '#f2a900'], ['14', '#1f5fa8', '#c62828'], ['16', '#e9edf1', '#e07b1a'], ['tank', '#c62828', '#c62828'], ['18', '#c62828', '#2c3e50'], ['16', '#6a2c91', '#f2b705'],
+  const tk = [['14', '#1b8a4b', '#f2a900', null, 'Safar'], ['14', '#1f5fa8', '#e05a4a', null, 'Bharat'], ['16', '#e9edf1', '#e07b1a'], ['tank', '#c62828', '#c62828'], ['18', '#c62828', '#2c3e50'], ['16', '#6a2c91', '#f2b705'],
     ['16', '#1f5fa8', '#e07b1a', 'COAL'], ['18', '#1b8a4b', '#2c3e50', 'CEMENT'], ['16', '#c62828', '#8a5a3a', 'IRON ORE']];
-  for (const [id, a, b, c] of tk){ const t = buildTruck(id, a, b, c ? CARGO[c] : null); TRAFFIC_TPL.push({ grp: t.grp, L: t.L, W: t.W, kind: 'truck', w: id === '18' ? 0.6 : 1 }); }
+  for (const [id, a, b, c, s] of tk){ const t = buildTruck(id, a, b, c ? CARGO[c] : null, s); TRAFFIC_TPL.push({ grp: t.grp, L: t.L, W: t.W, kind: 'truck', w: id === '18' ? 0.6 : 1 }); }
 }
 function cloneVehicle(tpl){
   const g = tpl.grp.clone(), axles = [];
@@ -2712,7 +2839,7 @@ function clipOff(){ PL.clip.set(_clipN.set(0, 1, 0), 1e6); CAB.backWall.visible 
 function setLens(hfov, near, maxV){
   const a = camera.aspect;
   const v = clamp(2 * Math.atan(Math.tan(hfov * Math.PI / 360) / a) * 180 / Math.PI, 40, maxV || (a < 1 ? 95 : 80));
-  if (Math.abs(camera.fov - v) > 0.05 || camera.near !== near){ camera.fov = v; camera.near = near; camera.updateProjectionMatrix(); updatePointScale(); }
+  if (!(Math.abs(camera.fov - v) <= 0.05) || camera.near !== near){ if (!Number.isFinite(v)) return; camera.fov = v; camera.near = near; camera.updateProjectionMatrix(); updatePointScale(); }   // also heals a NaN fov
 }
 function updateCamera(dt){
   // portrait screens: camera pulls back a little and looks down more, so the truck stays big and the sky small
@@ -2814,7 +2941,7 @@ function updateCamera(dt){
 // menu / garage: slow orbit around the parked truck; view shifted so panels never cover it
 let viewShift = [0, 0];
 function applyViewShift(){
-  const w = innerWidth, h = innerHeight;
+  const w = innerWidth, h = innerHeight; if (!w || !h) return;
   if (!viewShift[0] && !viewShift[1]) camera.clearViewOffset();
   else camera.setViewOffset(w, h, viewShift[0] * w, viewShift[1] * h, w, h);
 }
@@ -3887,6 +4014,7 @@ function updateHUD(){
 let PR = 1, PR_MAX = 1, perfT = 0, perfN = 0, perfSum = 0;
 function resize(){
   const w = innerWidth, h = innerHeight;
+  if (!w || !h) return;               // a hidden / mid-rotation window can report 0×0: a 0/0 aspect would black the picture out
   renderer.setPixelRatio(PR); renderer.setSize(w, h, false);
   camera.aspect = w / h; camera.updateProjectionMatrix();
   if (G.mode === 'menu' && G.screen === 'garage') viewShift = gShift();
@@ -3958,7 +4086,7 @@ if (location.hostname === 'localhost'){
     state(){ return { mode: G.mode, kmh: Math.round(G.v * 3.6), s: Math.round(G.s - G.s0), l: +G.l.toFixed(2), fuel: +G.fuel.toFixed(3), hearts: G.hearts,
       coins: G.coins, traffic: traffic.length, onc: oncoming.length, items: items.length, chunks: chunks.size, night: +G.night.toFixed(2), hours: +G.hours.toFixed(2),
       calls: renderer.info.render.calls, tris: renderer.info.render.triangles, parts: pGeo.drawRange.count }; },
-    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); }, closeCall(){ G.near++; rwCloseCall(); },
+    input(k, v){ IN[k] = v; }, set(k, v){ G[k] = v; }, cam(i){ setCam(i); }, closeCall(){ G.near++; rwCloseCall(); }, orbit(a){ CAM.orbit = a; }, camInfo(){ return { pos: camera.position.toArray().map(v => +v.toFixed(2)), look: CAM.look.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), near: camera.near, view: camera.view && camera.view.enabled ? [camera.view.offsetX, camera.view.offsetY] : null, dx: CAM.dx, dy: CAM.dy, shift: viewShift.slice(), aspect: +camera.aspect.toFixed(3) }; },
     music(){ const it = curItem(); return { playing: MUSIC.playing, idx: MUSIC.idx, song: it && it.name, songs: musicList().length, yt: YTP.loaded, ytState: YTP.state, ytReady: YTP.ready, tv: !$('ytDock').hidden }; }
   };
 }
